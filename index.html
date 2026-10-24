@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oficina de Jogos</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#3B5BA9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#DCE8C8; --panel:#FBFAF2; --line:#3B5BA9; --line2:#A9BCEB;
+  --ink:#26304A; --muted:#5D6880; --gold:#F2A93B; --danger:#B8433A;
+  --check1:#E9ECE3; --check2:#D3D8CC;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#171D33;--panel:#232B4A;--line:#8AA2F0;--line2:#3D4B80;--ink:#EEF1FA;--muted:#A9B2CC;--gold:#F5B84F;--danger:#F07A6E;--check1:#2E3658;--check2:#262D4A;color-scheme:dark}
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif;min-height:100vh}
+h1,h2,h3,.tab,.btn{font-family:"Pixelify Sans","Atkinson Hyperlegible",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--line);color:#fff;display:flex;align-items:center;gap:12px;padding:10px 14px}
+header h1{font-size:1.25rem;margin:0;font-weight:700;flex:1}
+.tabs{display:flex;gap:6px}
+.tab{background:transparent;border:2px solid rgba(255,255,255,.55);color:#fff;border-radius:8px;padding:6px 14px;font-size:1rem;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:#26304A}
+main{max-width:980px;margin:0 auto;padding:14px}
+.win{background:var(--panel);border:3px solid var(--line);border-radius:10px;box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 5px var(--line2);padding:16px 18px;margin-bottom:14px}
+.win h2{margin:0 0 8px;font-size:1.2rem}
+.win h3{margin:12px 0 6px;font-size:1rem}
+p.hint{margin:0 0 10px;color:var(--muted);max-width:70ch}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:.88rem;color:var(--muted)}
+select,input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line2);border-radius:6px;padding:6px 8px}
+textarea{width:100%;min-height:120px;resize:vertical;font-size:.9rem}
+input[type=color]{width:44px;height:38px;border:2px solid var(--line2);border-radius:6px;background:var(--bg);padding:2px}
+.btn{font-size:.98rem;background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer}
+.btn.main{background:var(--line);color:#fff}
+.btn.on{background:var(--gold);border-color:var(--gold);color:#26304A}
+.btn.warn{border-color:var(--danger);color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hide{display:none!important}
+/* sprites */
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.edwrap{overflow:auto;display:flex;justify-content:center;padding:6px}
+#ed{touch-action:none;image-rendering:pixelated;border:2px solid var(--line2);border-radius:4px;max-width:100%}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.swatches{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.sw{width:28px;height:28px;border-radius:5px;border:2px solid var(--line2);cursor:pointer;padding:0}
+.sw.sel{outline:3px solid var(--gold);outline-offset:1px}
+.angs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.ang{background:var(--bg);border:2px solid var(--line2);border-radius:8px;padding:6px;cursor:pointer;text-align:center;font:inherit;color:var(--ink);font-size:.8rem}
+.ang.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.ang canvas{width:64px;height:64px;image-rendering:pixelated;display:block;margin:0 auto 4px;border-radius:3px}
+.ang small{display:block;color:var(--muted);font-size:.72rem}
+#prevOrig{max-width:140px;max-height:140px;border-radius:6px;border:2px solid var(--line2)}
+.badge{display:inline-block;background:var(--gold);color:#26304A;border-radius:5px;padding:1px 7px;font-size:.78rem;margin-left:6px}
+/* reuniao */
+.nota{white-space:pre-wrap;background:var(--bg);border:2px dashed var(--line2);border-radius:8px;padding:12px;font-size:.88rem;max-height:52vh;overflow:auto;user-select:text}
+.add{border-left:4px solid var(--gold);padding:6px 10px;margin:8px 0;background:var(--bg);border-radius:0 6px 6px 0}
+.add .meta{font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.add pre{white-space:pre-wrap;margin:4px 0 0;font:inherit;font-size:.88rem}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+#toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Oficina de Jogos</h1>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="sprites">Sprites</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="reuniao">Reunião</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ SPRITES ============ -->
+<section id="tab-sprites">
+  <div class="win">
+    <h2>Sprite atual</h2>
+    <div class="row">
+      <label class="f">Nome<input type="text" id="nome" maxlength="40"></label>
+      <label class="f">Tamanho
+        <select id="tam"><option>16</option><option>24</option><option selected>32</option><option>48</option><option>64</option></select>
+      </label>
+      <button class="btn" id="bDiag">Diagonais: não</button>
+      <button class="btn" id="bEsp">Espelhar esquerda: sim</button>
+      <button class="btn warn" id="bNovo">Novo sprite</button>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="win">
+      <h2 id="edTitulo">Frente</h2>
+      <p class="hint hide" id="edEspelho">Este ângulo é a direita espelhada. Para editar à mão, desligue “Espelhar esquerda”.</p>
+      <div class="tools">
+        <button class="btn on" data-tool="lapis">Lápis</button>
+        <button class="btn" data-tool="borracha">Borracha</button>
+        <button class="btn" data-tool="balde">Balde</button>
+        <button class="btn" data-tool="conta">Conta-gotas</button>
+        <input type="color" id="cor" aria-label="Cor">
+        <button class="btn" id="bUndo">Desfazer</button>
+        <button class="btn" id="bGrade">Grade</button>
+      </div>
+      <div class="edwrap"><canvas id="ed"></canvas></div>
+      <div class="swatches" id="swatches" aria-label="Cores do sprite"></div>
+      <div class="tools">
+        <button class="btn" id="bCopiarDe">Copiar de outro ângulo</button>
+        <button class="btn" id="bVirar">Virar na horizontal</button>
+        <button class="btn warn" id="bLimpar">Limpar ângulo</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="win">
+        <h2>Ângulos</h2>
+        <div class="angs" id="angs"></div>
+      </div>
+      <div class="win">
+        <h2>Baixar</h2>
+        <div class="row">
+          <label class="f">Escala
+            <select id="escala"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select>
+          </label>
+          <button class="btn main" id="bFolha">Baixar folha</button>
+          <button class="btn" id="bUm">Baixar este ângulo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <h2>Da foto para o pixel</h2>
+    <p class="hint">Escolha uma foto. O app reduz, limita as cores no estilo GBA e coloca no ângulo selecionado. Funciona sem internet.</p>
+    <div class="row">
+      <input type="file" id="foto" accept="image/*">
+      <img id="prevOrig" class="hide" alt="Foto escolhida">
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="f">Cores<select id="kcores"><option>6</option><option>8</option><option selected>12</option><option>16</option></select></label>
+      <label class="f">Fundo<select id="fundo"><option value="1" selected>Remover fundo</option><option value="0">Manter</option></select></label>
+      <label class="f">Contorno<select id="contorno"><option value="borda" selected>Escurecer borda</option><option value="fora">Contorno de fora</option><option value="nenhum">Nenhum</option></select></label>
+      <label class="f">Tolerância do fundo<input type="number" id="tol" value="40" min="5" max="120"></label>
+      <button class="btn main" id="bPixel" disabled>Pixelizar no ângulo</button>
+    </div>
+  </div>
+
+  <div class="win">
+    <h2>Pedir os ângulos ao Claude</h2>
+    <p class="hint">Copie o pedido, cole no Claude junto com a foto e depois cole aqui a resposta. Os ângulos chegam prontos.</p>
+    <button class="btn main" id="bPedido">Copiar pedido</button>
+    <h3>Resposta do Claude</h3>
+    <textarea id="txtGrade" placeholder="Cole aqui o bloco JSON que o Claude mandou"></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn main" id="bImportar">Colocar nos ângulos</button></div>
+  </div>
+</section>
+
+<!-- ============ REUNIÃO ============ -->
+<section id="tab-reuniao" class="hide">
+  <div class="win">
+    <h2>Nota da reunião</h2>
+    <p class="hint">Tudo o que fizemos até aqui. Copie e cole no Claude quando quiser continuar, sem precisar explicar de novo.</p>
+    <div class="row" style="margin-bottom:10px"><button class="btn main" id="bCopiarNota">Copiar nota</button></div>
+    <div class="nota" id="nota" tabindex="0"></div>
+  </div>
+  <div class="win">
+    <h2>Adicionar à nota</h2>
+    <p class="hint">Cole o bloco “Adição para a Reunião” que o Claude entrega no fim das respostas, ou escreva o que quiser guardar.</p>
+    <textarea id="txtAdd" placeholder="O que entra na nota"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn main" id="bAdd">Adicionar à nota</button>
+      <label class="btn" for="arqAdd">Adicionar de um arquivo</label>
+      <input type="file" id="arqAdd" class="hide" accept=".txt,.md,.html,.htm,.json">
+    </div>
+    <div id="listaAdd"></div>
+  </div>
+  <div class="win">
+    <h2>Backup do app</h2>
+    <p class="hint">Salva o sprite e a reunião num arquivo, para guardar ou levar para outro aparelho.</p>
+    <div class="row">
+      <button class="btn" id="bExport">Salvar backup</button>
+      <label class="btn" for="arqBackup">Abrir backup</label>
+      <input type="file" id="arqBackup" class="hide" accept=".json">
+    </div>
+  </div>
+</section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+(()=>{
+const ANG=[
+  {id:'frente',nome:'Frente'},
+  {id:'costas',nome:'Costas'},
+  {id:'direita',nome:'Direita'},
+  {id:'esquerda',nome:'Esquerda',esp:'direita'},
+  {id:'fd',nome:'Frente-direita',diag:1},
+  {id:'fe',nome:'Frente-esquerda',diag:1,esp:'fd'},
+  {id:'cd',nome:'Costas-direita',diag:1},
+  {id:'ce',nome:'Costas-esquerda',diag:1,esp:'cd'}
+];
+const ALIAS={frente:'frente',front:'frente',costas:'costas',tras:'costas','trás':'costas',back:'costas',direita:'direita',right:'direita',esquerda:'esquerda',left:'esquerda',
+  'frente-direita':'fd',fd:'fd','frente-esquerda':'fe',fe:'fe','costas-direita':'cd',cd:'cd','costas-esquerda':'ce',ce:'ce'};
+const KEY='oficina-jogos-v1';
+const $=s=>document.querySelector(s);
+
+let S=carregar()||novoEstado();
+let sel='frente', tool='lapis', grade=true, undo=[], imgFoto=null;
+
+function novoEstado(){return{nome:'sofa',tam:32,diagonais:false,espelhar:true,cor:'#304878',angulos:{},adicoes:[],criado:Date.now()}}
+function carregar(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
+let tSalvar=null;
+function salvar(){clearTimeout(tSalvar);tSalvar=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Não deu para salvar no aparelho. Faça um backup.')}},250)}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
+function vazio(){return new Array(S.tam*S.tam).fill('')}
+function def(id){return ANG.find(a=>a.id===id)}
+function espelhado(id){const d=def(id);return S.espelhar&&!!d.esp}
+function espelhar(arr,n){const o=new Array(n*n);for(let y=0;y<n;y++)for(let x=0;x<n;x++)o[y*n+x]=arr[y*n+(n-1-x)];return o}
+function pix(id){
+  if(espelhado(id)){const b=S.angulos[def(id).esp];return b?espelhar(b,S.tam):null}
+  return S.angulos[id]||null;
+}
+function temConteudo(a){return a&&a.some(c=>c)}
+function visiveis(){return ANG.filter(a=>S.diagonais||!a.diag)}
+
+/* ---------- abas ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $('#tab-sprites').classList.toggle('hide',b.dataset.tab!=='sprites');
+  $('#tab-reuniao').classList.toggle('hide',b.dataset.tab!=='reuniao');
+  if(b.dataset.tab==='reuniao')renderReuniao();
+});
+
+/* ---------- topo do sprite ---------- */
+$('#nome').value=S.nome; $('#tam').value=S.tam; $('#cor').value=S.cor;
+$('#nome').oninput=e=>{S.nome=e.target.value;salvar()};
+$('#tam').onchange=e=>{
+  const n=+e.target.value, o=S.tam;
+  for(const k in S.angulos){const a=S.angulos[k],b=new Array(n*n);
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++)b[y*n+x]=a[Math.floor(y*o/n)*o+Math.floor(x*o/n)];
+    S.angulos[k]=b}
+  S.tam=n;undo=[];salvar();renderTudo();
+};
+function rotulos(){
+  $('#bDiag').textContent='Diagonais: '+(S.diagonais?'sim':'não');$('#bDiag').classList.toggle('on',S.diagonais);
+  $('#bEsp').textContent='Espelhar esquerda: '+(S.espelhar?'sim':'não');$('#bEsp').classList.toggle('on',S.espelhar);
+}
+$('#bDiag').onclick=()=>{S.diagonais=!S.diagonais;if(!S.diagonais&&def(sel).diag)sel='frente';salvar();renderTudo()};
+$('#bEsp').onclick=()=>{
+  if(S.espelhar){ANG.filter(a=>a.esp).forEach(a=>{const b=S.angulos[a.esp];if(b)S.angulos[a.id]=espelhar(b,S.tam)})}
+  S.espelhar=!S.espelhar;salvar();renderTudo();
+};
+$('#bNovo').onclick=()=>{if(!confirm('Começar um sprite novo? O atual será apagado (a nota da reunião fica).'))return;
+  const ad=S.adicoes;S=novoEstado();S.adicoes=ad;sel='frente';undo=[];$('#nome').value=S.nome;$('#tam').value=S.tam;salvar();renderTudo()};
+
+/* ---------- editor ---------- */
+const ed=$('#ed'), ctx=ed.getContext('2d');
+let zoom=10;
+function medir(){const w=Math.min(ed.parentElement.clientWidth-16,560);zoom=Math.max(4,Math.floor(w/S.tam));ed.width=ed.height=zoom*S.tam}
+function desenharXadrez(c,n,z,w){for(let y=0;y<n;y++)for(let x=0;x<n;x++){c.fillStyle=((x+y)&1)?cssVar('--check1'):cssVar('--check2');c.fillRect(x*z,y*z,z,z)}}
+function cssVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function renderEditor(){
+  medir();const n=S.tam,z=zoom,a=pix(sel)||vazio();
+  desenharXadrez(ctx,n,z);
+  for(let i=0;i<a.length;i++)if(a[i]){ctx.fillStyle=a[i];ctx.fillRect((i%n)*z,Math.floor(i/n)*z,z,z)}
+  if(grade&&z>=6){ctx.strokeStyle='rgba(60,80,140,.18)';ctx.lineWidth=1;ctx.beginPath();
+    for(let i=0;i<=n;i++){ctx.moveTo(i*z+.5,0);ctx.lineTo(i*z+.5,n*z);ctx.moveTo(0,i*z+.5);ctx.lineTo(n*z,i*z+.5)}ctx.stroke()}
+  $('#edTitulo').innerHTML=def(sel).nome+(espelhado(sel)?'<span class="badge">espelhado</span>':'');
+  $('#edEspelho').classList.toggle('hide',!espelhado(sel));
+}
+function celula(e){const r=ed.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*S.tam),y=Math.floor((e.clientY-r.top)/r.height*S.tam);
+  return(x<0||y<0||x>=S.tam||y>=S.tam)?null:y*S.tam+x}
+function alvo(){if(!S.angulos[sel])S.angulos[sel]=vazio();return S.angulos[sel]}
+function guardarUndo(){undo.push({id:sel,a:(S.angulos[sel]||vazio()).slice()});if(undo.length>40)undo.shift()}
+let pintando=false;
+ed.addEventListener('pointerdown',e=>{
+  if(espelhado(sel)){toast('Este ângulo é espelhado. Edite a direita.');return}
+  const i=celula(e);if(i==null)return;
+  if(tool==='conta'){const c=(pix(sel)||[])[i];if(c){S.cor=c;$('#cor').value=c;renderSwatches();toast('Cor escolhida')}return}
+  guardarUndo();
+  if(tool==='balde'){balde(i);depoisEditar();return}
+  pintando=true;ed.setPointerCapture(e.pointerId);pintar(i);
+});
+ed.addEventListener('pointermove',e=>{if(!pintando)return;const i=celula(e);if(i!=null)pintar(i)});
+ed.addEventListener('pointerup',()=>{if(pintando){pintando=false;depoisEditar()}});
+ed.addEventListener('pointercancel',()=>{pintando=false});
+function pintar(i){const a=alvo();const v=tool==='borracha'?'':S.cor;if(a[i]===v)return;a[i]=v;
+  const n=S.tam,z=zoom,x=(i%n)*z,y=Math.floor(i/n)*z;
+  if(v){ctx.fillStyle=v;ctx.fillRect(x,y,z,z)}else{ctx.fillStyle=(((i%n)+Math.floor(i/n))&1)?cssVar('--check1'):cssVar('--check2');ctx.fillRect(x,y,z,z)}}
+function balde(i){const a=alvo(),n=S.tam,de=a[i],para=S.cor;if(de===para)return;const st=[i];
+  while(st.length){const k=st.pop();if(a[k]!==de)continue;a[k]=para;const x=k%n,y=(k/n)|0;
+    if(x>0)st.push(k-1);if(x<n-1)st.push(k+1);if(y>0)st.push(k-n);if(y<n-1)st.push(k+n)}}
+function depoisEditar(){salvar();renderEditor();renderAngs();renderSwatches()}
+document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('on',x===b))});
+$('#cor').oninput=e=>{S.cor=e.target.value;salvar();renderSwatches()};
+$('#bUndo').onclick=()=>{const u=undo.pop();if(!u){toast('Nada para desfazer');return}S.angulos[u.id]=u.a;sel=u.id;depoisEditar()};
+$('#bGrade').onclick=()=>{grade=!grade;$('#bGrade').classList.toggle('on',grade);renderEditor()};
+$('#bLimpar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');if(!confirm('Limpar o ângulo '+def(sel).nome+'?'))return;guardarUndo();delete S.angulos[sel];depoisEditar()};
+$('#bVirar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const a=S.angulos[sel];if(!temConteudo(a))return toast('Ângulo vazio');guardarUndo();S.angulos[sel]=espelhar(a,S.tam);depoisEditar()};
+$('#bCopiarDe').onclick=()=>{
+  if(espelhado(sel))return toast('Este ângulo é espelhado.');
+  const ops=visiveis().filter(a=>a.id!==sel&&temConteudo(pix(a.id)));
+  if(!ops.length)return toast('Nenhum outro ângulo tem desenho ainda');
+  const r=prompt('Copiar de qual ângulo?\n'+ops.map((a,i)=>(i+1)+' = '+a.nome).join('\n'),'1');
+  const o=ops[(+r||0)-1];if(!o)return;guardarUndo();S.angulos[sel]=pix(o.id).slice();depoisEditar();toast('Copiado de '+o.nome);
+};
+
+/* ---------- cores ---------- */
+function coresUsadas(){const s=new Set();for(const k in S.angulos)(S.angulos[k]||[]).forEach(c=>c&&s.add(c));return[...s]}
+function renderSwatches(){const box=$('#swatches');box.innerHTML='';
+  const cs=coresUsadas().slice(0,40);if(!cs.includes(S.cor))cs.unshift(S.cor);
+  cs.forEach(c=>{const b=document.createElement('button');b.className='sw'+(c===S.cor?' sel':'');b.style.background=c;b.title=c;b.setAttribute('aria-label','Cor '+c);
+    b.onclick=()=>{S.cor=c;$('#cor').value=c;salvar();renderSwatches()};box.appendChild(b)})}
+
+/* ---------- miniaturas ---------- */
+function desenharEm(c,a,n,esc,x0=0){const g=c.getContext('2d');if(!a)return;for(let i=0;i<a.length;i++)if(a[i]){g.fillStyle=a[i];g.fillRect(x0+(i%n)*esc,Math.floor(i/n)*esc,esc,esc)}}
+function renderAngs(){const box=$('#angs');box.innerHTML='';
+  visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');
+    const c=document.createElement('canvas');c.width=c.height=S.tam;const p=pix(a.id);desenharEm(c,p,S.tam,1);
+    b.appendChild(c);b.append(a.nome);const s=document.createElement('small');s.textContent=espelhado(a.id)?'espelhado':(temConteudo(p)?'pronto':'vazio');b.appendChild(s);
+    b.onclick=()=>{sel=a.id;renderEditor();renderAngs()};box.appendChild(b)})}
+
+/* ---------- baixar ---------- */
+function baixarCanvas(c,nome){c.toBlob(b=>{const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download=nome;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)},'image/png')}
+function slug(){return(S.nome||'sprite').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'sprite'}
+$('#bFolha').onclick=()=>{const fs=visiveis().filter(a=>temConteudo(pix(a.id)));if(!fs.length)return toast('Desenhe ou importe um ângulo primeiro');
+  const e=+$('#escala').value,n=S.tam,c=document.createElement('canvas');c.width=n*e*fs.length;c.height=n*e;
+  fs.forEach((a,i)=>desenharEm(c,pix(a.id),n,e,i*n*e));baixarCanvas(c,slug()+'-folha.png');toast('Folha: '+fs.map(a=>a.nome).join(', '))};
+$('#bUm').onclick=()=>{const p=pix(sel);if(!temConteudo(p))return toast('Este ângulo está vazio');const e=+$('#escala').value,c=document.createElement('canvas');c.width=c.height=S.tam*e;desenharEm(c,p,S.tam,e);baixarCanvas(c,slug()+'-'+sel+'.png')};
+
+/* ---------- foto para pixel ---------- */
+$('#foto').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const im=new Image();
+  im.onload=()=>{imgFoto=im;$('#prevOrig').src=u;$('#prevOrig').classList.remove('hide');$('#bPixel').disabled=false};
+  im.onerror=()=>toast('Não consegui abrir essa imagem. Tente JPG ou PNG.');im.src=u};
+$('#bPixel').onclick=()=>{if(!imgFoto)return;if(espelhado(sel))return toast('Escolha um ângulo que não seja espelhado');
+  if(temConteudo(S.angulos[sel])&&!confirm('Substituir o desenho de '+def(sel).nome+'?'))return;
+  guardarUndo();S.angulos[sel]=pixelizar(imgFoto,S.tam,+$('#kcores').value,$('#fundo').value==='1',$('#contorno').value,+$('#tol').value||40);
+  depoisEditar();toast('Pronto em '+def(sel).nome)};
+
+function pixelizar(img,N,K,tirarFundo,contorno,tol){
+  const M=N*4,c=document.createElement('canvas');c.width=c.height=M;const g=c.getContext('2d',{willReadFrequently:true});
+  const pad=contorno==='fora'?2*4:0, area=M-pad*2;
+  const s=area/Math.max(img.width,img.height),w=Math.round(img.width*s),h=Math.round(img.height*s),ox=Math.round((M-w)/2),oy=Math.round((M-h)/2);
+  g.imageSmoothingQuality='high';g.drawImage(img,ox,oy,w,h);
+  if(tirarFundo){const d=g.getImageData(0,0,M,M),p=d.data;
+    const cant=[[ox,oy],[ox+w-1,oy],[ox,oy+h-1],[ox+w-1,oy+h-1]].map(([x,y])=>{const i=(y*M+x)*4;return[p[i],p[i+1],p[i+2]]});
+    const ref=[0,1,2].map(k=>cant.reduce((s,v)=>s+v[k],0)/4);const t2=tol*tol;
+    const vis=new Uint8Array(M*M),st=[];
+    for(let x=ox;x<ox+w;x++){st.push(oy*M+x,(oy+h-1)*M+x)}for(let y=oy;y<oy+h;y++){st.push(y*M+ox,y*M+ox+w-1)}
+    while(st.length){const k=st.pop();if(vis[k])continue;vis[k]=1;const i=k*4;if(p[i+3]===0)continue;
+      const dr=p[i]-ref[0],dg=p[i+1]-ref[1],db=p[i+2]-ref[2];if(dr*dr+dg*dg+db*db>t2)continue;p[i+3]=0;
+      const x=k%M,y=(k/M)|0;if(x>0)st.push(k-1);if(x<M-1)st.push(k+1);if(y>0)st.push(k-M);if(y<M-1)st.push(k+M)}
+    g.putImageData(d,0,0)}
+  const c2=document.createElement('canvas');c2.width=c2.height=N;const g2=c2.getContext('2d',{willReadFrequently:true});
+  g2.imageSmoothingQuality='high';g2.drawImage(c,0,0,N,N);const p=g2.getImageData(0,0,N,N).data;
+  const px=[];for(let i=0;i<N*N;i++){if(p[i*4+3]>=128)px.push([p[i*4],p[i*4+1],p[i*4+2],i])}
+  const out=new Array(N*N).fill('');if(!px.length)return out;
+  // k-means
+  const ord=px.slice().sort((a,b)=>(a[0]*3+a[1]*6+a[2])-(b[0]*3+b[1]*6+b[2]));
+  let cen=[];for(let k=0;k<Math.min(K,ord.length);k++)cen.push(ord[Math.floor((k+.5)*ord.length/Math.min(K,ord.length))].slice(0,3));
+  const lab=new Int32Array(px.length);
+  for(let it=0;it<12;it++){const sum=cen.map(()=>[0,0,0,0]);
+    px.forEach((q,j)=>{let b=0,bd=1e9;cen.forEach((c,k)=>{const d=(q[0]-c[0])**2+(q[1]-c[1])**2+(q[2]-c[2])**2;if(d<bd){bd=d;b=k}});lab[j]=b;const s=sum[b];s[0]+=q[0];s[1]+=q[1];s[2]+=q[2];s[3]++});
+    cen=cen.map((c,k)=>sum[k][3]?[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]]:c)}
+  const gba=v=>Math.min(248,Math.round(v/8)*8);
+  const hex=c=>'#'+c.map(v=>gba(v).toString(16).padStart(2,'0')).join('');
+  px.forEach((q,j)=>out[q[3]]=hex(cen[lab[j]]));
+  const viz=i=>{const x=i%N,y=(i/N)|0,r=[];if(x>0)r.push(i-1);if(x<N-1)r.push(i+1);if(y>0)r.push(i-N);if(y<N-1)r.push(i+N);return r};
+  const escuro=h=>{const v=[1,3,5].map(k=>parseInt(h.substr(k,2),16));return hex([v[0]*.35+10,v[1]*.35+12,v[2]*.35+22])};
+  if(contorno==='borda'){const base=out.slice();for(let i=0;i<N*N;i++){if(!base[i])continue;const x=i%N,y=(i/N)|0;
+      if(x===0||y===0||x===N-1||y===N-1||viz(i).some(k=>!base[k]))out[i]=escuro(base[i])}}
+  else if(contorno==='fora'){const base=out.slice();for(let i=0;i<N*N;i++){if(base[i])continue;const v=viz(i).find(k=>base[k]);if(v!=null)out[i]=escuro(base[v])}}
+  return out;
+}
+
+/* ---------- Claude: pedido e importação ---------- */
+function listaAngulosPedido(){return visiveis().filter(a=>!espelhado(a.id)).map(a=>a.nome.toLowerCase())}
+function textoPedido(){const n=S.tam,ang=listaAngulosPedido();
+  return `Claude, anexei a foto de um objeto. Veja o que é e desenhe um sprite em pixel art no estilo Pokémon de GBA (FireRed/Emerald): contorno escuro, sombreado de 3 a 4 tons por cor, luz vindo de cima à esquerda, vista levemente de cima como nos jogos.
+Nome: ${S.nome||'sprite'}
+Tamanho: ${n}x${n} pixels.
+Ângulos: ${ang.join(', ')}.${S.espelhar?' Não desenhe a esquerda: o app espelha a direita sozinho.':''}
+Mantenha o objeto do mesmo tamanho e as mesmas cores em todos os ângulos.
+
+Responda com um bloco JSON neste formato, e nada além do bloco:
+{
+  "nome": "${S.nome||'sprite'}",
+  "tamanho": ${n},
+  "paleta": { "a": "#203048", "b": "#5878b0" },
+  "angulos": {
+    "${ang[0]||'frente'}": ["${'.'.repeat(Math.min(n,8))}... (${n} linhas, cada uma com ${n} caracteres)"]
+  }
+}
+Regras: "." é transparente; cada letra da paleta é uma cor; cada ângulo tem exatamente ${n} linhas de ${n} caracteres; no máximo 16 cores. Os nomes dos ângulos são: frente, costas, direita, esquerda, frente-direita, frente-esquerda, costas-direita, costas-esquerda.`}
+async function copiar(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();return ok}}
+$('#bPedido').onclick=async()=>toast(await copiar(textoPedido())?'Pedido copiado. Cole no Claude junto com a foto.':'Não consegui copiar.');
+$('#bImportar').onclick=()=>{
+  let t=$('#txtGrade').value.trim();if(!t)return toast('Cole a resposta do Claude primeiro');
+  t=t.replace(/```(json)?/gi,'');const i0=t.indexOf('{'),i1=t.lastIndexOf('}');if(i0<0||i1<0)return toast('Não achei o bloco JSON na resposta');
+  let j;try{j=JSON.parse(t.slice(i0,i1+1))}catch(e){return toast('O JSON veio com erro. Peça ao Claude para reenviar só o bloco.')}
+  const pal=j.paleta||{},angs=j.angulos||{};const ks=Object.keys(angs);if(!ks.length)return toast('A resposta não tem ângulos');
+  let n=+j.tamanho||(angs[ks[0]]||[]).length||S.tam;
+  if(n!==S.tam){if(!confirm('O sprite veio em '+n+'x'+n+'. Mudar o tamanho do projeto para '+n+'?'))return;S.angulos={};S.tam=n;$('#tam').value=[16,24,32,48,64].includes(n)?n:32}
+  if(j.nome){S.nome=j.nome;$('#nome').value=j.nome}
+  const feitos=[];
+  ks.forEach(k=>{const id=ALIAS[k.toLowerCase().trim()];if(!id)return;const linhas=angs[k];if(!Array.isArray(linhas))return;
+    const a=new Array(n*n).fill('');for(let y=0;y<n;y++){const l=String(linhas[y]||'');for(let x=0;x<n;x++){const ch=l[x];if(ch&&ch!=='.'&&ch!==' '&&pal[ch])a[y*n+x]=String(pal[ch]).toLowerCase()}}
+    if(def(id).esp&&S.espelhar){S.espelhar=false}
+    if(def(id).diag)S.diagonais=true;
+    S.angulos[id]=a;feitos.push(def(id).nome)});
+  if(!feitos.length)return toast('Nenhum nome de ângulo reconhecido');
+  undo=[];sel=ALIAS[ks[0].toLowerCase()]||'frente';salvar();renderTudo();toast('Ângulos colocados: '+feitos.join(', '));
+};
+
+/* ---------- reunião ---------- */
+function notaBase(){
+  const prontos=ANG.filter(a=>temConteudo(pix(a.id))).map(a=>a.nome+(espelhado(a.id)?' (espelhado)':''));
+  return `REUNIÃO · OFICINA DE JOGOS (Tama)
+
+Instrução para o Claude:
+Leia esta nota inteira antes de responder; ela é o histórico do projeto. Continue de onde paramos, sem pedir que eu explique de novo. No fim de cada resposta, entregue um bloco “Adição para a Reunião” curto, dizendo o que mudou ou foi decidido, para eu colar no app.
+
+Sobre o projeto:
+- App pessoal para criar jogos pequenos, em repositório próprio no GitHub Pages, separado da Tamaki Central.
+- Uso no tablet Samsung Galaxy A11. Tudo gratuito e leve, sem mandar meu material para IAs de fora.
+- Abas prontas: Sprites e Reunião. Próximas etapas: Passo a passo (trilha de como fazer um jogo) e Engine (motor 2D na web).
+- Arquivos do app: index.html, manifest.json, sw.js, icon-192.png, icon-512.png.
+
+Como a aba Sprites funciona:
+- Foto vira pixel art no app (redução, cores estilo GBA de 15 bits, contorno), offline.
+- Os outros ângulos o Claude desenha em grade JSON: {"nome","tamanho","paleta":{"letra":"#hex"},"angulos":{"frente":[linhas]}}; "." é transparente.
+- Ângulos: frente, costas, direita, esquerda, e diagonais opcionais. A esquerda pode ser a direita espelhada.
+- Editor com lápis, borracha, balde, conta-gotas, desfazer; baixa folha de sprites em PNG.
+
+Sprite atual: ${S.nome||'sem nome'}, ${S.tam}x${S.tam}, ${coresUsadas().length} cores.
+Ângulos prontos: ${prontos.length?prontos.join(', '):'nenhum ainda'}.`}
+function notaCompleta(){let t=notaBase();if(S.adicoes.length){t+='\n\nAdições:';S.adicoes.forEach(a=>{t+='\n\n['+new Date(a.d).toLocaleDateString('pt-BR')+']\n'+a.t})}return t}
+function renderReuniao(){$('#nota').textContent=notaCompleta();const box=$('#listaAdd');box.innerHTML='';
+  if(!S.adicoes.length)return;const h=document.createElement('h3');h.textContent='Adições guardadas';box.appendChild(h);
+  S.adicoes.slice().reverse().forEach(a=>{const d=document.createElement('div');d.className='add';
+    d.innerHTML='<div class="meta"><span></span><button class="btn warn">Remover</button></div><pre></pre>';
+    d.querySelector('span').textContent=new Date(a.d).toLocaleString('pt-BR');d.querySelector('pre').textContent=a.t;
+    d.querySelector('button').onclick=()=>{if(!confirm('Remover esta adição da nota?'))return;S.adicoes=S.adicoes.filter(x=>x!==a);salvar();renderReuniao()};
+    box.appendChild(d)})}
+function adicionar(t){t=(t||'').trim();if(!t)return toast('Escreva ou cole algo primeiro');S.adicoes.push({d:Date.now(),t});salvar();renderReuniao();toast('Adicionado à nota')}
+$('#bCopiarNota').onclick=async()=>toast(await copiar(notaCompleta())?'Nota copiada':'Não consegui copiar.');
+$('#bAdd').onclick=()=>{adicionar($('#txtAdd').value);$('#txtAdd').value=''};
+$('#arqAdd').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{let t=String(r.result);if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(t,'text/html');t=d.body?d.body.innerText||d.body.textContent:t}
+    adicionar('Arquivo: '+f.name+'\n'+t.trim())};r.readAsText(f);e.target.value=''};
+$('#bExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download='oficina-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast('Backup salvo')};
+$('#arqBackup').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||!j.tam||!j.angulos)throw 0;if(!confirm('Abrir este backup? O que está no app agora será trocado.'))return;
+    S=Object.assign(novoEstado(),j);sel='frente';undo=[];$('#nome').value=S.nome;$('#tam').value=S.tam;$('#cor').value=S.cor;salvar();renderTudo();renderReuniao();toast('Backup aberto')}
+    catch(_){toast('Esse arquivo não é um backup da Oficina')}};r.readAsText(f);e.target.value=''};
+
+function renderTudo(){rotulos();renderEditor();renderAngs();renderSwatches()}
+window.addEventListener('resize',()=>renderEditor());
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>renderEditor());
+renderTudo();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
