@@ -66,7 +66,14 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
 .card{background:var(--bg);border:2px solid var(--line2);border-radius:8px;padding:8px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
 .card.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
-.card canvas{display:block;margin:0 auto 6px}
+.card canvas{display:block;margin:0 auto 6px;width:100%;max-width:128px;height:auto;aspect-ratio:1}
+.card .nm{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card.org{cursor:default;text-align:left}
+.card.org input,.card.org select{width:100%;font-size:.85rem;padding:4px 6px;margin-top:4px}
+.card.org canvas{max-width:96px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font:inherit;font-size:.85rem;background:var(--bg);color:var(--ink);border:2px solid var(--line2);border-radius:999px;padding:3px 11px;cursor:pointer}
+.chip.on{background:var(--gold);border-color:var(--gold);color:#26304A}
 .card small{display:block;color:var(--muted);font-size:.75rem}
 /* separador */
 .item{border:2px solid var(--line2);border-radius:8px;padding:10px;margin-top:10px;background:var(--bg)}
@@ -82,7 +89,7 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
 .angs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .ang{background:var(--bg);border:2px solid var(--line2);border-radius:8px;padding:6px;cursor:pointer;text-align:center;font:inherit;color:var(--ink);font-size:.8rem}
 .ang.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
-.ang canvas{display:block;margin:0 auto 4px}
+.ang canvas{display:block;margin:0 auto 4px;width:64px;height:64px}
 .ang small{display:block;color:var(--muted);font-size:.72rem}
 .badge{display:inline-block;background:var(--gold);color:#26304A;border-radius:5px;padding:1px 7px;font-size:.78rem}
 /* reuniao */
@@ -181,13 +188,20 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
 <section id="tab-biblioteca" class="hide">
   <div class="win">
     <h2>Biblioteca</h2>
-    <p class="hint">Toque num sprite para abrir no Editor.</p>
+    <p class="hint" id="biblioHint">Toque num sprite para abrir no Editor. Use “Organizar” para renomear, mudar o tipo ou apagar.</p>
+    <div class="row">
+      <label class="f grow">Buscar<input type="text" id="busca" placeholder="Nome do sprite"></label>
+      <label class="f">Categoria<select id="filtroCat"></select></label>
+      <button class="btn" id="bOrganizar">Organizar</button>
+    </div>
+    <div class="chips" id="chipsTipo" aria-label="Filtrar por tipo"></div>
+    <div id="biblio"></div>
+    <h3>Mais opções</h3>
     <div class="row">
       <button class="btn" id="bBaixarCat">Baixar folha da categoria</button>
       <select id="selCatBaixar" aria-label="Categoria para baixar"></select>
       <button class="btn" id="bRestaurar">Restaurar a sala base</button>
     </div>
-    <div id="biblio"></div>
   </div>
 </section>
 
@@ -197,6 +211,7 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
     <div class="row">
       <label class="f grow">Nome<input type="text" id="nome" maxlength="40"></label>
       <label class="f">Categoria<select id="eCat"></select></label>
+      <label class="f">Tipo<select id="eTipo"></select></label>
       <label class="f">Tamanho
         <select id="tam"><option>16</option><option>24</option><option>32</option><option>48</option><option>64</option></select>
       </label>
@@ -205,7 +220,7 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
       <button class="btn" id="bDiag">Diagonais: não</button>
       <button class="btn" id="bEsp">Espelhar esquerda: não</button>
       <button class="btn" id="bDuplicar">Duplicar</button>
-      <button class="btn warn" id="bExcluir">Excluir</button>
+      <button class="btn warn" id="bExcluir">Apagar</button>
     </div>
   </div>
 
@@ -301,6 +316,16 @@ const BASE = [{"slug":"sofa","cat":"sala","json":{"nome":"Sofá","tamanho":32,"p
 const ESTILO_FIXO='ESTILO FIXO (não mudar): folha de sprites em pixel art, estilo interiores de GBA/DS como Pokémon HeartGold e FireRed. Mesma vista frontal levemente de cima da folha da sala. Escala: bloco de 16x16 px; adulto chibi com 1 bloco de largura e 2 de altura; sofá de 2 lugares com 2 blocos de largura. Pixels nítidos sem antialiasing, 4 a 6 tons por material, luz de cima à esquerda, contorno escuro só na silhueta. Cada objeto em 4 vistas na mesma linha: frente, lado direito, lado esquerdo, costas. Fundo magenta sólido (#FF00FF), sem sombras, sem textos e sem números, itens separados e alinhados em grade.';
 const REGUA='1 bloco = 16x16 px ≈ 1 metro. Adulto 16x32 (chibi, figura ~16x24) | Criança 16x24 | Porta 16x32 | Geladeira 16x32 | Cama 16x32 | Cadeira 16x16 | Planta 16x24 | Mesa 32x24 | Sofá 32x24 | Animal pequeno 12x12 | Carro 64x28 | Casa pequena 80x80.';
 const CATS=['sala','quarto','cozinha','banheiro','escritório','loja','cidade','natureza','personagem','criatura','item','outro'];
+const TIPOS=[['assento','Assento'],['mesa','Mesa'],['cama','Cama'],['armario','Armário e estante'],['eletrico','Elétrico'],['iluminacao','Iluminação'],['planta','Planta'],['decoracao','Decoração'],['utensilio','Utensílio'],['construcao','Porta, janela e parede'],['veiculo','Veículo'],['personagem','Personagem'],['outro','Outro']];
+const TIPO_NOME=Object.fromEntries(TIPOS);
+function semAcento(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function adivinharTipo(nome){const n=semAcento(nome);const R=[
+  ['assento',/sofa|poltrona|cadeira|banco|banqueta|trono|pufe|puff|assento/],['mesa',/mesa|escrivaninha|bancada|balcao|criado/],['cama',/cama|beliche|berco|colchao/],
+  ['eletrico',/\btv\b|televis|computador|\bpc\b|geladeira|fogao|micro|maquina|radio|ventilador|ar.cond|videogame|console|celular|notebook/],['armario',/armario|guarda|estante|prateleira|comoda|gaveteiro|rack|cristaleira/],
+  ['iluminacao',/luminaria|abajur|lustre|lampada|vela|poste|lanterna/],['planta',/planta|vaso|arvore|flor|arbusto|cacto|samambaia/],['decoracao',/quadro|tapete|espelho|cortina|relogio|estatua|enfeite|almofada|livro/],
+  ['construcao',/porta|janela|parede|escada|cerca|portao|piso/],['veiculo',/carro|moto|bicicleta|caminhao|onibus|barco/],['personagem',/personagem|pessoa|npc|heroi|menin/]];
+  for(const[t,r]of R)if(r.test(n))return t;return'outro'}
+function preencherTipos(el,val){el.innerHTML=TIPOS.map(([k,v])=>`<option value="${k}">${v}</option>`).join('');el.value=val||'outro'}
 const ANG=[
   {id:'frente',nome:'Frente'},{id:'direita',nome:'Direita'},{id:'esquerda',nome:'Esquerda',esp:'direita'},{id:'costas',nome:'Costas'},
   {id:'fd',nome:'Frente-direita',diag:1},{id:'fe',nome:'Frente-esquerda',diag:1,esp:'fd'},{id:'cd',nome:'Costas-direita',diag:1},{id:'ce',nome:'Costas-esquerda',diag:1,esp:'cd'}
@@ -336,7 +361,7 @@ function preencherCats(el,val){el.innerHTML=CATS.map(c=>`<option value="${c}">${
 function spriteDeJSON(j,cat){
   const pal=j.paleta||{},angs=j.angulos||{};const ks=Object.keys(angs);if(!ks.length)throw new Error('sem ângulos');
   const n=+j.tamanho||(angs[ks[0]]||[]).length||32;
-  const sp={id:uid(),nome:j.nome||'sprite',cat:cat||j.categoria||'outro',tam:n,angulos:{},espelhar:false,diagonais:false};
+  const sp={id:uid(),nome:j.nome||'sprite',cat:cat||j.categoria||'outro',tipo:(j.tipo&&TIPO_NOME[j.tipo])?j.tipo:adivinharTipo(j.nome),tam:n,angulos:{},espelhar:false,diagonais:false};
   ks.forEach(k=>{const id=ALIAS[String(k).toLowerCase().trim()];if(!id)return;const linhas=angs[k];if(!Array.isArray(linhas))return;
     const a=new Array(n*n).fill('');
     for(let y=0;y<n;y++){const l=String(linhas[y]||'');for(let x=0;x<n;x++){const ch=l[x];if(ch&&ch!=='.'&&ch!==' '&&pal[ch])a[y*n+x]=String(pal[ch]).toLowerCase()}}
@@ -351,6 +376,7 @@ function semear(forcar){
   S.semeado=true;if(!S.atual&&S.sprites[0])S.atual=S.sprites[0].id;salvar();return n;
 }
 if(!S.semeado)semear();
+S.sprites.forEach(s=>{if(!s.tipo||!TIPO_NOME[s.tipo])s.tipo=adivinharTipo(s.nome)});
 if(!S.sprites.find(s=>s.id===S.atual))S.atual=S.sprites[0]?S.sprites[0].id:null;
 
 /* ================= abas ================= */
@@ -373,7 +399,12 @@ function pixDe(sp,id){if(!sp)return null;const d=def(id);
   return sp.angulos[id]||null}
 function temConteudo(a){return a&&a.some(c=>c)}
 function desenharEm(c,a,n,esc,x0=0){const g=c.getContext('2d');if(!a)return;for(let i=0;i<a.length;i++)if(a[i]){g.fillStyle=a[i];g.fillRect(x0+(i%n)*esc,Math.floor(i/n)*esc,esc,esc)}}
-function mini(sp,id,esc=2.5){const c=document.createElement('canvas');c.className='px';c.width=c.height=sp.tam;desenharEm(c,pixDe(sp,id),sp.tam,1);const w=Math.min(sp.tam*esc,140)+'px';c.style.width=c.style.height=w;return c}
+/* miniatura: caixa sempre 64x64 com o sprite em 1:1, apoiado embaixo e centralizado.
+   Todos ficam na mesma escala e nada passa do cartão; sprites maiores que 64 são reduzidos. */
+function miniArr(arr,n){const B=64,c=document.createElement('canvas');c.className='px';c.width=c.height=B;if(!arr)return c;
+  const t=document.createElement('canvas');t.width=t.height=n;desenharEm(t,arr,n,1);const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+  const e=n>B?B/n:1,w=n*e;g.drawImage(t,Math.floor((B-w)/2),B-w,w,w);return c}
+function mini(sp,id){return miniArr(pixDe(sp,id),sp.tam)}
 function primeiraVista(sp){return['frente','direita','costas','esquerda','fd','fe','cd','ce'].find(k=>temConteudo(pixDe(sp,k)))||'frente'}
 
 /* ================= PASSO 1: pedido para o Claude ================= */
@@ -392,7 +423,7 @@ function coresDominantes(im,k){
   return C.map((c,i)=>({c,n:cont[i]})).filter(o=>o.n>X.length*0.02).sort((a,b)=>b.n-a.n).map(o=>rgbHex(...o.c));
 }
 function resumoBiblioteca(){
-  const porCat={};S.sprites.forEach(s=>{(porCat[s.cat]=porCat[s.cat]||[]).push(s.nome)});
+  const porCat={};S.sprites.forEach(s=>{(porCat[s.cat]=porCat[s.cat]||[]).push(`${s.nome} (${(TIPO_NOME[s.tipo]||'Outro').toLowerCase()})`)});
   return Object.keys(porCat).length?Object.entries(porCat).map(([c,l])=>`- ${c}: ${l.join(', ')}`).join('\n'):'- (vazia)';
 }
 function paletaBiblioteca(){
@@ -423,8 +454,8 @@ ${resumoBiblioteca()}
 
 COMO RESPONDER (o app lê estes blocos)
 1. Um bloco começando com a linha "PROMPT PARA O GPT", com o ESTILO FIXO no início e a lista de itens, um por linha, com tamanho em blocos e materiais.
-2. Um bloco começando com a linha "FICHA PARA O APP", com um JSON assim: {"categoria":"...","itens":["Nome 1","Nome 2"],"vistas":["frente","direita","esquerda","costas"],"largura_primeiro_px":32}
-   (largura_primeiro_px = largura real em pixels do 1º item, pela régua.)
+2. Um bloco começando com a linha "FICHA PARA O APP", com um JSON assim: {"categoria":"...","itens":["Nome 1","Nome 2"],"tipos":["assento","mesa"],"vistas":["frente","direita","esquerda","costas"],"largura_primeiro_px":32}
+   (largura_primeiro_px = largura real em pixels do 1º item, pela régua. tipos: um por item, entre ${TIPOS.map(t=>t[0]).join(', ')}.)
 3. Um bloco "Adição para a Reunião".`;
 }
 $('#bPedido').onclick=async()=>{const ok=await copiar(textoPedido());const st=$('#stPedido');st.textContent=ok?'Pedido copiado. Cole no Claude e anexe a mesma imagem.':'Não consegui copiar.';st.className='status '+(ok?'ok':'erro')};
@@ -514,7 +545,8 @@ function separarFolha(im,refPx){
     vs.forEach((v,vi)=>{const id=vistas[vi];if(!id||!def(id))return;const a=new Array(tam*tam).fill('');const ox=Math.floor((tam-v.w)/2),oy=tam-v.h;
       for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){const X_=ox+x,Y_=oy+y;if(X_>=0&&Y_>=0&&X_<tam&&Y_<tam)a[Y_*tam+X_]=v.cor[y*v.w+x]}
       angulos[id]=a});
-    return{incluir:true,nome:(nomes&&nomes[ri])||('Item '+(ri+1)),cat:(ficha&&ficha.categoria&&CATS.includes(ficha.categoria))?ficha.categoria:$('#fCat').value,
+    const nomeIt=(nomes&&nomes[ri])||('Item '+(ri+1));const tiposF=ficha&&Array.isArray(ficha.tipos)?ficha.tipos:null;
+    return{incluir:true,nome:nomeIt,tipo:(tiposF&&TIPO_NOME[tiposF[ri]])?tiposF[ri]:adivinharTipo(nomeIt),cat:(ficha&&ficha.categoria&&CATS.includes(ficha.categoria))?ficha.categoria:$('#fCat').value,
       tam,angulos,diagonais:Object.keys(angulos).some(k=>def(k).diag),grande:maior>64,n:vs.length};
   });
 }
@@ -526,17 +558,17 @@ function renderSeparados(){
   separados.forEach((it,i)=>{
     const d=document.createElement('div');d.className='item';
     d.innerHTML=`<div class="row"><label class="row" style="gap:6px"><input type="checkbox" checked> Salvar</label>
-      <label class="f grow">Nome<input type="text" value=""></label><label class="f">Categoria<select></select></label><small style="color:var(--muted)">${it.tam}×${it.tam}</small></div><div class="vistas"></div>`;
-    const [cb]=d.querySelectorAll('input[type=checkbox]');const nm=d.querySelector('input[type=text]');const sc=d.querySelector('select');
-    nm.value=it.nome;preencherCats(sc,it.cat);
+      <label class="f grow">Nome<input type="text" value=""></label><label class="f">Categoria<select class="sc"></select></label><label class="f">Tipo<select class="st"></select></label><small style="color:var(--muted)">${it.tam}×${it.tam}</small></div><div class="vistas"></div>`;
+    const [cb]=d.querySelectorAll('input[type=checkbox]');const nm=d.querySelector('input[type=text]');const sc=d.querySelector('select.sc'),stp=d.querySelector('select.st');
+    nm.value=it.nome;preencherCats(sc,it.cat);preencherTipos(stp,it.tipo);stp.onchange=()=>it.tipo=stp.value;
     cb.onchange=()=>it.incluir=cb.checked;nm.oninput=()=>it.nome=nm.value;sc.onchange=()=>it.cat=sc.value;
     const vb=d.querySelector('.vistas');
-    Object.keys(it.angulos).forEach(k=>{const f=document.createElement('figure');const c=document.createElement('canvas');c.className='px';c.width=c.height=it.tam;desenharEm(c,it.angulos[k],it.tam,1);f.appendChild(c);f.append(def(k).nome);vb.appendChild(f)});
+    Object.keys(it.angulos).forEach(k=>{const f=document.createElement('figure');f.appendChild(miniArr(it.angulos[k],it.tam));f.append(def(k).nome);vb.appendChild(f)});
     box.appendChild(d)});
   $('#rowSalvar').classList.toggle('hide',!separados.length);
 }
 $('#bSalvarFolha').onclick=()=>{const l=separados.filter(s=>s.incluir);if(!l.length)return toast('Marque pelo menos um item');
-  l.forEach(it=>S.sprites.push({id:uid(),nome:it.nome.trim()||'sprite',cat:it.cat,tam:it.tam,angulos:it.angulos,espelhar:false,diagonais:it.diagonais}));
+  l.forEach(it=>S.sprites.push({id:uid(),nome:it.nome.trim()||'sprite',cat:it.cat,tipo:it.tipo,tam:it.tam,angulos:it.angulos,espelhar:false,diagonais:it.diagonais}));
   S.atual=S.sprites[S.sprites.length-l.length].id;salvar();separados=[];$('#itensFolha').innerHTML='';$('#rowSalvar').classList.add('hide');
   $('#stFolha').textContent=`${l.length} sprites salvos na biblioteca.`;$('#stFolha').className='status ok';toast(`${l.length} sprites salvos`);abrirAba('biblioteca')};
 
@@ -553,18 +585,50 @@ function kmeans(X,k,it=12){
 
 /* ================= BIBLIOTECA ================= */
 preencherCats($('#selCatBaixar'));
+const filtro={busca:'',cat:'',tipo:'',organizar:false};
+$('#filtroCat').innerHTML='<option value="">Todas</option>'+CATS.map(c=>`<option value="${c}">${c[0].toUpperCase()+c.slice(1)}</option>`).join('');
+$('#busca').oninput=e=>{filtro.busca=e.target.value;renderBiblio()};
+$('#filtroCat').onchange=e=>{filtro.cat=e.target.value;renderBiblio()};
+$('#bOrganizar').onclick=()=>{filtro.organizar=!filtro.organizar;renderBiblio()};
+function renderChips(){
+  const box=$('#chipsTipo');box.innerHTML='';
+  const base=S.sprites.filter(s=>!filtro.cat||s.cat===filtro.cat);
+  const usados=TIPOS.filter(([k])=>base.some(s=>s.tipo===k));
+  if(filtro.tipo&&!usados.some(([k])=>k===filtro.tipo))filtro.tipo='';
+  [['','Todos']].concat(usados).forEach(([k,v])=>{const n=k?base.filter(s=>s.tipo===k).length:base.length;
+    const b=document.createElement('button');b.className='chip'+(filtro.tipo===k?' on':'');b.textContent=`${v} (${n})`;b.setAttribute('aria-pressed',filtro.tipo===k);
+    b.onclick=()=>{filtro.tipo=k;renderBiblio()};box.appendChild(b)});
+}
 function renderBiblio(){
+  S.sprites.forEach(s=>{if(!s.tipo||!TIPO_NOME[s.tipo])s.tipo=adivinharTipo(s.nome)});
+  $('#bOrganizar').textContent=filtro.organizar?'Concluir':'Organizar';$('#bOrganizar').classList.toggle('on',filtro.organizar);
+  renderChips();
   const box=$('#biblio');box.innerHTML='';
   if(!S.sprites.length){box.innerHTML='<p class="hint">A biblioteca está vazia. Crie sprites na aba Criar ou restaure a sala base.</p>';return}
-  CATS.forEach(c=>{const l=S.sprites.filter(s=>s.cat===c);if(!l.length)return;
+  const q=semAcento(filtro.busca.trim());
+  const lista=S.sprites.filter(s=>(!filtro.cat||s.cat===filtro.cat)&&(!filtro.tipo||s.tipo===filtro.tipo)&&(!q||semAcento(s.nome).includes(q)));
+  if(!lista.length){box.innerHTML='<p class="hint">Nenhum sprite com esse filtro. Toque em “Todos” ou limpe a busca.</p>';return}
+  CATS.forEach(c=>{const l=lista.filter(s=>s.cat===c);if(!l.length)return;
     const h=document.createElement('div');h.className='cat';h.textContent=`${c[0].toUpperCase()+c.slice(1)} (${l.length})`;box.appendChild(h);
     const g=document.createElement('div');g.className='cards';
-    l.forEach(sp=>{const b=document.createElement('button');b.className='card'+(sp.id===S.atual?' sel':'');b.appendChild(mini(sp,primeiraVista(sp)));
-      b.append(sp.nome);const sm=document.createElement('small');sm.textContent=`${sp.tam}×${sp.tam} · ${Object.keys(sp.angulos).length} vistas`;b.appendChild(sm);
-      b.onclick=()=>{S.atual=sp.id;sel=primeiraVista(sp);undo=[];salvar();abrirAba('editor')};g.appendChild(b)});
+    l.forEach(sp=>g.appendChild(filtro.organizar?cartaoOrganizar(sp):cartao(sp)));
     box.appendChild(g)});
   const usadas=CATS.filter(c=>S.sprites.some(s=>s.cat===c));if(usadas.length&&!usadas.includes($('#selCatBaixar').value))$('#selCatBaixar').value=usadas[0];
 }
+function cartao(sp){
+  const b=document.createElement('button');b.className='card'+(sp.id===S.atual?' sel':'');b.appendChild(mini(sp,primeiraVista(sp)));
+  const nm=document.createElement('span');nm.className='nm';nm.textContent=sp.nome;b.appendChild(nm);
+  const sm=document.createElement('small');sm.textContent=`${TIPO_NOME[sp.tipo]||'Outro'} · ${Object.keys(sp.angulos).length} vistas`;b.appendChild(sm);
+  b.onclick=()=>{S.atual=sp.id;sel=primeiraVista(sp);undo=[];salvar();abrirAba('editor')};return b}
+function cartaoOrganizar(sp){
+  const d=document.createElement('div');d.className='card org';d.appendChild(mini(sp,primeiraVista(sp)));
+  const nm=document.createElement('input');nm.type='text';nm.value=sp.nome;nm.setAttribute('aria-label','Nome');nm.maxLength=40;
+  nm.onchange=()=>{sp.nome=nm.value.trim()||'sprite';salvar();toast('Renomeado')};
+  const tp=document.createElement('select');tp.setAttribute('aria-label','Tipo');preencherTipos(tp,sp.tipo);tp.onchange=()=>{sp.tipo=tp.value;salvar();renderChips()};
+  const ct=document.createElement('select');ct.setAttribute('aria-label','Categoria');preencherCats(ct,sp.cat);ct.onchange=()=>{sp.cat=ct.value;salvar();renderBiblio()};
+  const ap=document.createElement('button');ap.className='btn warn small';ap.style.marginTop='6px';ap.textContent='Apagar';
+  ap.onclick=()=>{if(!confirm(`Apagar “${sp.nome}”? Isso não pode ser desfeito.`))return;S.sprites=S.sprites.filter(s=>s!==sp);if(S.atual===sp.id)S.atual=S.sprites[0]?S.sprites[0].id:null;salvar();renderBiblio();toast('Apagado')};
+  d.append(nm,tp,ct,ap);return d}
 $('#bRestaurar').onclick=()=>{const n=semear(true);renderBiblio();toast(n?`${n} móveis da sala voltaram`:'A sala base já está completa')};
 $('#bBaixarCat').onclick=()=>{const c=$('#selCatBaixar').value;const l=S.sprites.filter(s=>s.cat===c);if(!l.length)return toast('Essa categoria está vazia');
   const ord=['frente','direita','esquerda','costas','fd','fe','cd','ce'];const T=Math.max(...l.map(s=>s.tam)),e=4;
@@ -575,13 +639,14 @@ $('#bBaixarCat').onclick=()=>{const c=$('#selCatBaixar').value;const l=S.sprites
   baixarCanvas(cv,'folha-'+slug(c)+'.png')};
 
 /* ================= EDITOR ================= */
-preencherCats($('#eCat'));
+preencherCats($('#eCat'));preencherTipos($('#eTipo'));
+$('#eTipo').onchange=e=>{const sp=cur();if(!sp)return;sp.tipo=e.target.value;salvar()};
 function renderEditorTudo(){
   const sp=cur();const vaz=!sp;
   document.querySelectorAll('#tab-editor .win').forEach((w,i)=>{if(i<3)w.classList.toggle('hide',vaz)});
   document.querySelector('#tab-editor .grid2').classList.toggle('hide',vaz);
   if(vaz)return;
-  $('#nome').value=sp.nome;$('#tam').value=sp.tam;$('#eCat').value=sp.cat;$('#cor').value=S.cor;
+  $('#nome').value=sp.nome;$('#tam').value=sp.tam;$('#eCat').value=sp.cat;$('#eTipo').value=sp.tipo||'outro';$('#cor').value=S.cor;
   if(!def(sel)||(def(sel).diag&&!sp.diagonais))sel='frente';
   rotulos();renderEditor();renderAngs();renderSwatches();
 }
@@ -603,7 +668,7 @@ $('#bEsp').onclick=()=>{const sp=cur();
   else{ANG.filter(a=>a.esp).forEach(a=>{const b=sp.angulos[a.esp];if(b)sp.angulos[a.id]=espelharArr(b,sp.tam)})}
   sp.espelhar=!sp.espelhar;salvar();renderEditorTudo()};
 $('#bDuplicar').onclick=()=>{const sp=cur();const c=JSON.parse(JSON.stringify(sp));c.id=uid();c.nome=sp.nome+' (cópia)';delete c.base;S.sprites.push(c);S.atual=c.id;salvar();renderEditorTudo();toast('Cópia criada')};
-$('#bExcluir').onclick=()=>{const sp=cur();if(!confirm(`Excluir “${sp.nome}” da biblioteca?`))return;S.sprites=S.sprites.filter(s=>s!==sp);S.atual=S.sprites[0]?S.sprites[0].id:null;salvar();abrirAba('biblioteca');toast('Excluído')};
+$('#bExcluir').onclick=()=>{const sp=cur();if(!confirm(`Apagar “${sp.nome}”? Isso não pode ser desfeito.`))return;S.sprites=S.sprites.filter(s=>s!==sp);S.atual=S.sprites[0]?S.sprites[0].id:null;salvar();abrirAba('biblioteca');toast('Apagado')};
 
 const ed=$('#ed'),ctx=ed.getContext('2d');let zoom=10;
 function cssVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
@@ -654,7 +719,7 @@ function renderSwatches(){const box=$('#swatches');box.innerHTML='';const cs=cor
   cs.forEach(c=>{const b=document.createElement('button');b.className='sw'+(c===S.cor?' sel':'');b.style.background=c;b.title=c;b.setAttribute('aria-label','Cor '+c);
     b.onclick=()=>{S.cor=c;$('#cor').value=c;salvar();renderSwatches()};box.appendChild(b)})}
 function renderAngs(){const box=$('#angs');box.innerHTML='';const sp=cur();
-  visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');b.appendChild(mini(sp,a.id,2));b.append(a.nome);
+  visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');b.appendChild(mini(sp,a.id));b.append(a.nome);
     const s=document.createElement('small');s.textContent=espelhado(a.id)?'espelhado':(temConteudo(pixDe(sp,a.id))?'pronto':'vazio');b.appendChild(s);
     b.onclick=()=>{sel=a.id;renderEditor();renderAngs()};box.appendChild(b)})}
 function baixarCanvas(c,nome){c.toBlob(b=>{const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download=nome;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)},'image/png')}
