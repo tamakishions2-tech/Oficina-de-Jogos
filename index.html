@@ -91,6 +91,13 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
 .ang.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
 .ang canvas{display:block;margin:0 auto 4px;width:64px;height:64px}
 .ang small{display:block;color:var(--muted);font-size:.72rem}
+.anim{border-top:2px dashed var(--line2);padding-top:10px;margin-top:10px}
+.anim:first-child{border-top:0;margin-top:0;padding-top:0}
+.anim h3{margin:0 0 6px;font-size:.95rem}
+.anim .play{width:96px;height:96px;display:block;margin:0 auto 8px}
+.quadros{display:flex;flex-wrap:wrap;gap:6px}
+.quadros .ang{padding:4px;flex:0 0 auto}
+.quadros .ang canvas{width:48px;height:48px}
 .badge{display:inline-block;background:var(--gold);color:#26304A;border-radius:5px;padding:1px 7px;font-size:.78rem}
 /* reuniao */
 .nota{white-space:pre-wrap;background:var(--bg);border:2px dashed var(--line2);border-radius:8px;padding:12px;font-size:.88rem;max-height:52vh;overflow:auto;user-select:text}
@@ -136,7 +143,7 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
           <option value="4">4 vistas (frente, lados, costas)</option>
           <option value="1">Só a frente</option>
           <option value="8">8 vistas (com diagonais)</option>
-          <option value="anda">Personagem andando (4 direções × 3 passos)</option>
+          <option value="anda">Personagem completo (andar em loop + interação)</option>
         </select>
       </label>
     </div>
@@ -249,6 +256,13 @@ canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic
       <div class="win">
         <h2>Ângulos</h2>
         <div class="angs" id="angs"></div>
+      </div>
+      <div class="win hide" id="winAnim">
+        <h2>Animações</h2>
+        <div class="row" style="margin-bottom:8px"><label class="f">Velocidade
+          <select id="fps"><option value="4">Lenta</option><option value="6" selected>Normal</option><option value="9">Rápida</option></select></label></div>
+        <div id="anims"></div>
+        <button class="btn" id="bFolhaAnim" style="margin-top:10px">Baixar folha de animação</button>
       </div>
       <div class="win">
         <h2>Baixar</h2>
@@ -384,7 +398,7 @@ function abrirAba(nome){
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===nome));
   ['fluxo','biblioteca','editor','reuniao'].forEach(t=>$('#tab-'+t).classList.toggle('hide',t!==nome));
   if(nome==='biblioteca')renderBiblio();
-  if(nome==='editor')renderEditorTudo();
+  if(nome==='editor')renderEditorTudo();else clearInterval(timerAnim);
   if(nome==='reuniao')renderReuniao();
   window.scrollTo(0,0);
 }
@@ -392,9 +406,18 @@ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>abrirAba(b.dataset.ta
 
 /* ================= desenho de miniaturas ================= */
 function cur(){return S.sprites.find(s=>s.id===S.atual)||null}
-function def(id){return ANG.find(a=>a.id===id)}
+function isAnim(id){return typeof id==='string'&&id.startsWith('a:')}
+function refAnim(id){const p=id.split(':');return{a:+p[1],f:+p[2]}}
+function def(id){
+  if(isAnim(id)){const sp=cur();const r=refAnim(id);const A=sp&&sp.anim&&sp.anim[r.a];if(!A||r.f>=A.frames.length)return undefined;
+    return{id,nome:`${A.nome} · ${A.quadros&&A.quadros[r.f]||'quadro '+(r.f+1)}`}}
+  return ANG.find(a=>a.id===id)}
+function getArr(sp,id){if(isAnim(id)){const r=refAnim(id),A=sp.anim&&sp.anim[r.a];return A?A.frames[r.f]||null:null}return sp.angulos[id]||null}
+function setArr(sp,id,arr){if(isAnim(id)){const r=refAnim(id),A=sp.anim&&sp.anim[r.a];if(A)A.frames[r.f]=arr||new Array(sp.tam*sp.tam).fill('');return}
+  if(arr)sp.angulos[id]=arr;else delete sp.angulos[id]}
+function todosArr(sp){const l=Object.values(sp.angulos);(sp.anim||[]).forEach(A=>A.frames.forEach(f=>f&&l.push(f)));return l}
 function espelharArr(arr,n){const o=new Array(n*n);for(let y=0;y<n;y++)for(let x=0;x<n;x++)o[y*n+x]=arr[y*n+(n-1-x)];return o}
-function pixDe(sp,id){if(!sp)return null;const d=def(id);
+function pixDe(sp,id){if(!sp)return null;if(isAnim(id))return getArr(sp,id);const d=def(id);
   if(sp.espelhar&&d.esp){const b=sp.angulos[d.esp];return b?espelharArr(b,sp.tam):null}
   return sp.angulos[id]||null}
 function temConteudo(a){return a&&a.some(c=>c)}
@@ -432,7 +455,7 @@ function paletaBiblioteca(){
   const pts=[];X.forEach(([h,n])=>{const v=hexRGB(h);for(let i=0;i<Math.min(n,40);i++)pts.push(v)});
   const{C}=kmeans(pts,Math.min(10,pts.length));return C.map(c=>rgbHex(...c)).join(', ');
 }
-const VISTAS_TXT={'4':'4 vistas: frente, lado direito, lado esquerdo, costas','1':'só a vista de frente','8':'8 vistas: frente, lado direito, lado esquerdo, costas e as 4 diagonais','anda':'personagem andando: 4 direções (frente, direita, esquerda, costas) × 3 quadros (parado, passo esquerdo, passo direito)'};
+const VISTAS_TXT={'4':'4 vistas: frente, lado direito, lado esquerdo, costas','1':'só a vista de frente','8':'8 vistas: frente, lado direito, lado esquerdo, costas e as 4 diagonais','anda':'personagem completo: andar em loop nas 4 direções (frente, direita, esquerda, costas), 3 quadros cada (parado, passo pé esquerdo, passo pé direito), mais 1 linha de pose de interação nas 4 direções'};
 function textoPedido(){
   const itens=$('#fItens').value.split('\n').map(s=>s.trim()).filter(Boolean);
   return `PEDIDO DE PROMPT · OFICINA DE JOGOS
@@ -455,7 +478,8 @@ ${resumoBiblioteca()}
 COMO RESPONDER (o app lê estes blocos)
 1. Um bloco começando com a linha "PROMPT PARA O GPT", com o ESTILO FIXO no início e a lista de itens, um por linha, com tamanho em blocos e materiais.
 2. Um bloco começando com a linha "FICHA PARA O APP", com um JSON assim: {"categoria":"...","itens":["Nome 1","Nome 2"],"tipos":["assento","mesa"],"vistas":["frente","direita","esquerda","costas"],"largura_primeiro_px":32}
-   (largura_primeiro_px = largura real em pixels do 1º item, pela régua. tipos: um por item, entre ${TIPOS.map(t=>t[0]).join(', ')}.)
+   (largura_primeiro_px = largura real em pixels do 1º item, pela régua. tipos: um por item, entre ${TIPOS.map(t=>t[0]).join(', ')}.)${$('#fVistas').value==='anda'?`
+   Para personagem completo, a ficha também leva "modo":"animacao" e "linhas": [{"nome":"Andar · frente","vista":"frente","loop":true,"quadros":["parado","passo esq","passo dir"]}, ... uma por linha da folha, na ordem de cima para baixo; a linha de interação com "loop":false e "quadros":["frente","direita","esquerda","costas"]].`:''}
 3. Um bloco "Adição para a Reunião".`;
 }
 $('#bPedido').onclick=async()=>{const ok=await copiar(textoPedido());const st=$('#stPedido');st.textContent=ok?'Pedido copiado. Cole no Claude e anexe a mesma imagem.':'Não consegui copiar.';st.className='status '+(ok?'ok':'erro')};
@@ -532,6 +556,26 @@ function separarFolha(im,refPx){
       px.push(n>t*0.5?[r/n,gg/n,b/n]:null)}
     return{w,h,px}};
   const vistasPadrao=(ficha&&Array.isArray(ficha.vistas)&&ficha.vistas.length)?ficha.vistas:['frente','direita','esquerda','costas'];
+  const modoAnim=(ficha&&ficha.modo==='animacao')||(!ficha&&$('#fVistas').value==='anda');
+  if(modoAnim){
+    const rs=linhas.map(L=>L.itens.map(amostra));
+    const X=[];rs.forEach(r=>r.forEach(v=>v.px.forEach(p=>p&&X.push(p))));
+    const{C,lab}=kmeans(X,Math.min(28,Math.max(2,X.length)));const pal=C.map(c=>rgbHex(...c.map(v=>Math.min(248,Math.round(v/8)*8))));
+    let ii=0;rs.forEach(r=>r.forEach(v=>{v.cor=v.px.map(p=>p?pal[lab[ii++]]:'')}));
+    const maior=Math.max(...rs.flat().map(v=>Math.max(v.w,v.h)));const tam=[32,48,64].find(t=>t>=maior)||64;
+    const colocar=v=>{const a=new Array(tam*tam).fill('');const ox=Math.floor((tam-v.w)/2),oy=tam-v.h;
+      for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){const X_=ox+x,Y_=oy+y;if(X_>=0&&Y_>=0&&X_<tam&&Y_<tam)a[Y_*tam+X_]=v.cor[y*v.w+x]}return a};
+    const LF=(ficha&&Array.isArray(ficha.linhas))?ficha.linhas:[];
+    const padrao=[['Andar · frente','frente'],['Andar · direita','direita'],['Andar · esquerda','esquerda'],['Andar · costas','costas'],['Interação',null]];
+    const anim=rs.map((r,ri)=>{const lf=LF[ri]||{};const pd=padrao[ri]||['Linha '+(ri+1),null];
+      const vista=lf.vista!==undefined?(ALIAS[String(lf.vista).toLowerCase()]||null):pd[1];
+      const loop=lf.loop!==undefined?!!lf.loop:!!vista;
+      const quadros=Array.isArray(lf.quadros)?lf.quadros:(loop?['parado','passo esq','passo dir']:['frente','direita','esquerda','costas']);
+      return{nome:lf.nome||pd[0],vista,loop,quadros,frames:r.map(colocar)}});
+    const angulos={};anim.forEach(A=>{if(A.loop&&A.vista&&def(A.vista)&&!angulos[A.vista])angulos[A.vista]=A.frames[0]});
+    const nomeIt=(ficha&&ficha.itens&&ficha.itens[0])||'Personagem';
+    return[{incluir:true,nome:nomeIt,tipo:'personagem',cat:(ficha&&CATS.includes(ficha.categoria))?ficha.categoria:'personagem',tam,angulos,anim,diagonais:false,grande:maior>64,n:rs.length}];
+  }
   return linhas.map((L,ri)=>{
     const vs=L.itens.map(amostra);
     // reduzir cores do item inteiro
@@ -553,8 +597,8 @@ function separarFolha(im,refPx){
 function renderSeparados(){
   const box=$('#itensFolha');box.innerHTML='';const st=$('#stFolha');
   const nf=ficha&&ficha.itens?ficha.itens.length:null;
-  st.textContent=`Encontrei ${separados.length} linhas de objetos.`+(nf&&nf!==separados.length?` A ficha tinha ${nf} itens: confira os nomes.`:'')+(separados.some(s=>s.grande)?' Algum objeto passou de 64 px e foi cortado: diminua a largura do 1º objeto.':'');
-  st.className='status '+((nf&&nf!==separados.length)||separados.some(s=>s.grande)?'erro':'ok');
+  st.textContent=(separados[0]&&separados[0].anim?`Encontrei ${separados[0].anim.length} linhas de animação.`:`Encontrei ${separados.length} linhas de objetos.`)+(nf&&nf!==separados.length&&!(separados[0]&&separados[0].anim)?` A ficha tinha ${nf} itens: confira os nomes.`:'')+(separados.some(s=>s.grande)?' Algum objeto passou de 64 px e foi cortado: diminua a largura do 1º objeto.':'');
+  st.className='status '+((nf&&nf!==separados.length&&!(separados[0]&&separados[0].anim))||separados.some(s=>s.grande)?'erro':'ok');
   separados.forEach((it,i)=>{
     const d=document.createElement('div');d.className='item';
     d.innerHTML=`<div class="row"><label class="row" style="gap:6px"><input type="checkbox" checked> Salvar</label>
@@ -563,12 +607,15 @@ function renderSeparados(){
     nm.value=it.nome;preencherCats(sc,it.cat);preencherTipos(stp,it.tipo);stp.onchange=()=>it.tipo=stp.value;
     cb.onchange=()=>it.incluir=cb.checked;nm.oninput=()=>it.nome=nm.value;sc.onchange=()=>it.cat=sc.value;
     const vb=d.querySelector('.vistas');
-    Object.keys(it.angulos).forEach(k=>{const f=document.createElement('figure');f.appendChild(miniArr(it.angulos[k],it.tam));f.append(def(k).nome);vb.appendChild(f)});
+    if(it.anim){vb.style.flexDirection='column';it.anim.forEach(A=>{const r=document.createElement('div');r.innerHTML=`<small style="color:var(--muted)"></small><div class="vistas" style="margin-top:2px"></div>`;
+        r.querySelector('small').textContent=A.nome+(A.loop?' · loop':'');const rv=r.querySelector('.vistas');
+        A.frames.forEach((f,fi)=>{const fg=document.createElement('figure');fg.appendChild(miniArr(f,it.tam));fg.append(A.quadros[fi]||('quadro '+(fi+1)));rv.appendChild(fg)});vb.appendChild(r)})}
+    else Object.keys(it.angulos).forEach(k=>{const f=document.createElement('figure');f.appendChild(miniArr(it.angulos[k],it.tam));f.append(def(k).nome);vb.appendChild(f)});
     box.appendChild(d)});
   $('#rowSalvar').classList.toggle('hide',!separados.length);
 }
 $('#bSalvarFolha').onclick=()=>{const l=separados.filter(s=>s.incluir);if(!l.length)return toast('Marque pelo menos um item');
-  l.forEach(it=>S.sprites.push({id:uid(),nome:it.nome.trim()||'sprite',cat:it.cat,tipo:it.tipo,tam:it.tam,angulos:it.angulos,espelhar:false,diagonais:it.diagonais}));
+  l.forEach(it=>S.sprites.push({id:uid(),nome:it.nome.trim()||'sprite',cat:it.cat,tipo:it.tipo,tam:it.tam,angulos:it.angulos,anim:it.anim||undefined,espelhar:false,diagonais:it.diagonais}));
   S.atual=S.sprites[S.sprites.length-l.length].id;salvar();separados=[];$('#itensFolha').innerHTML='';$('#rowSalvar').classList.add('hide');
   $('#stFolha').textContent=`${l.length} sprites salvos na biblioteca.`;$('#stFolha').className='status ok';toast(`${l.length} sprites salvos`);abrirAba('biblioteca')};
 
@@ -648,16 +695,16 @@ function renderEditorTudo(){
   if(vaz)return;
   $('#nome').value=sp.nome;$('#tam').value=sp.tam;$('#eCat').value=sp.cat;$('#eTipo').value=sp.tipo||'outro';$('#cor').value=S.cor;
   if(!def(sel)||(def(sel).diag&&!sp.diagonais))sel='frente';
-  rotulos();renderEditor();renderAngs();renderSwatches();
+  rotulos();renderEditor();renderAngs();renderSwatches();renderAnims();
 }
 $('#nome').oninput=e=>{const sp=cur();if(!sp)return;sp.nome=e.target.value;salvar()};
 $('#eCat').onchange=e=>{const sp=cur();if(!sp)return;sp.cat=e.target.value;salvar()};
 $('#tam').onchange=e=>{const sp=cur();if(!sp)return;const n=+e.target.value,o=sp.tam;
-  for(const k in sp.angulos){const a=sp.angulos[k],b=new Array(n*n).fill('');
-    // mantém o desenho apoiado embaixo e centralizado (corta ou ganha espaço)
-    const dx=Math.floor((n-o)/2),dy=n-o;
-    for(let y=0;y<o;y++)for(let x=0;x<o;x++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<n&&Y<n)b[Y*n+X]=a[y*o+x]}
-    sp.angulos[k]=b}
+  // mantém o desenho apoiado embaixo e centralizado (corta ou ganha espaço)
+  const mudar=a=>{if(!a)return a;const b=new Array(n*n).fill(''),dx=Math.floor((n-o)/2),dy=n-o;
+    for(let y=0;y<o;y++)for(let x=0;x<o;x++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<n&&Y<n)b[Y*n+X]=a[y*o+x]}return b};
+  for(const k in sp.angulos)sp.angulos[k]=mudar(sp.angulos[k]);
+  (sp.anim||[]).forEach(A=>{A.frames=A.frames.map(mudar)});
   sp.tam=n;undo=[];salvar();renderEditorTudo()};
 function rotulos(){const sp=cur();
   $('#bDiag').textContent='Diagonais: '+(sp.diagonais?'sim':'não');$('#bDiag').classList.toggle('on',sp.diagonais);
@@ -686,8 +733,8 @@ function renderEditor(){
   $('#edEspelho').classList.toggle('hide',!espelhado(sel));
 }
 function celula(e){const n=cur().tam,r=ed.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*n),y=Math.floor((e.clientY-r.top)/r.height*n);return(x<0||y<0||x>=n||y>=n)?null:y*n+x}
-function alvo(){const sp=cur();if(!sp.angulos[sel])sp.angulos[sel]=vazio();return sp.angulos[sel]}
-function guardarUndo(){const sp=cur();undo.push({sid:sp.id,id:sel,a:(sp.angulos[sel]||vazio()).slice()});if(undo.length>40)undo.shift()}
+function alvo(){const sp=cur();let a=getArr(sp,sel);if(!a){a=vazio();setArr(sp,sel,a)}return a}
+function guardarUndo(){const sp=cur();undo.push({sid:sp.id,id:sel,a:(getArr(sp,sel)||vazio()).slice()});if(undo.length>40)undo.shift()}
 let pintando=false;
 ed.addEventListener('pointerdown',e=>{
   if(!cur())return;if(espelhado(sel)){toast('Este ângulo é espelhado. Edite a direita.');return}
@@ -702,26 +749,51 @@ function pintar(i){const a=alvo(),n=cur().tam,v=tool==='borracha'?'':S.cor;if(a[
   const z=zoom,x=(i%n)*z,y=Math.floor(i/n)*z;ctx.fillStyle=v||((((i%n)+Math.floor(i/n))&1)?cssVar('--check1'):cssVar('--check2'));ctx.fillRect(x,y,z,z)}
 function balde(i){const a=alvo(),n=cur().tam,de=a[i],para=S.cor;if(de===para)return;const st=[i];
   while(st.length){const k=st.pop();if(a[k]!==de)continue;a[k]=para;const x=k%n,y=(k/n)|0;if(x>0)st.push(k-1);if(x<n-1)st.push(k+1);if(y>0)st.push(k-n);if(y<n-1)st.push(k+n)}}
-function depoisEditar(){salvar();renderEditor();renderAngs();renderSwatches()}
+function depoisEditar(){salvar();renderEditor();renderAngs();renderSwatches();renderAnims()}
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('on',x===b))});
 $('#cor').oninput=e=>{S.cor=e.target.value;salvar();renderSwatches()};
-$('#bUndo').onclick=()=>{const u=undo.pop();if(!u)return toast('Nada para desfazer');const sp=S.sprites.find(s=>s.id===u.sid);if(!sp)return;sp.angulos[u.id]=u.a;S.atual=sp.id;sel=u.id;salvar();renderEditorTudo()};
+$('#bUndo').onclick=()=>{const u=undo.pop();if(!u)return toast('Nada para desfazer');const sp=S.sprites.find(s=>s.id===u.sid);if(!sp)return;S.atual=sp.id;setArr(sp,u.id,u.a);sel=u.id;salvar();renderEditorTudo()};
 $('#bGrade').onclick=()=>{grade=!grade;$('#bGrade').classList.toggle('on',grade);renderEditor()};
-$('#bLimpar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');if(!confirm('Limpar o ângulo '+def(sel).nome+'?'))return;guardarUndo();delete cur().angulos[sel];depoisEditar()};
-$('#bVirar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const sp=cur(),a=sp.angulos[sel];if(!temConteudo(a))return toast('Ângulo vazio');guardarUndo();sp.angulos[sel]=espelharArr(a,sp.tam);depoisEditar()};
+$('#bLimpar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');if(!confirm('Limpar o ângulo '+def(sel).nome+'?'))return;guardarUndo();setArr(cur(),sel,null);depoisEditar()};
+$('#bVirar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const sp=cur(),a=getArr(sp,sel);if(!temConteudo(a))return toast('Ângulo vazio');guardarUndo();setArr(sp,sel,espelharArr(a,sp.tam));depoisEditar()};
 $('#bCopiarDe').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const sp=cur();
-  const ops=visiveis().filter(a=>a.id!==sel&&temConteudo(pixDe(sp,a.id)));if(!ops.length)return toast('Nenhum outro ângulo tem desenho ainda');
+  const ops=visiveis().concat(idsAnim(sp).map(def)).filter(a=>a&&a.id!==sel&&temConteudo(pixDe(sp,a.id)));if(!ops.length)return toast('Nenhum outro ângulo tem desenho ainda');
   const r=prompt('Copiar de qual ângulo?\n'+ops.map((a,i)=>(i+1)+' = '+a.nome).join('\n'),'1');const o=ops[(+r||0)-1];if(!o)return;
-  guardarUndo();sp.angulos[sel]=pixDe(sp,o.id).slice();depoisEditar();toast('Copiado de '+o.nome)};
+  guardarUndo();setArr(sp,sel,pixDe(sp,o.id).slice());depoisEditar();toast('Copiado de '+o.nome)};
 function visiveis(){const sp=cur();return ANG.filter(a=>sp.diagonais||!a.diag)}
-function coresUsadas(){const s=new Set();const sp=cur();if(sp)for(const k in sp.angulos)(sp.angulos[k]||[]).forEach(c=>c&&s.add(c));return[...s]}
+function coresUsadas(){const s=new Set();const sp=cur();if(sp)todosArr(sp).forEach(a=>a.forEach(c=>c&&s.add(c)));return[...s]}
+function idsAnim(sp){const l=[];(sp.anim||[]).forEach((A,ai)=>A.frames.forEach((f,fi)=>l.push('a:'+ai+':'+fi)));return l}
 function renderSwatches(){const box=$('#swatches');box.innerHTML='';const cs=coresUsadas().slice(0,48);if(!cs.includes(S.cor))cs.unshift(S.cor);
   cs.forEach(c=>{const b=document.createElement('button');b.className='sw'+(c===S.cor?' sel':'');b.style.background=c;b.title=c;b.setAttribute('aria-label','Cor '+c);
     b.onclick=()=>{S.cor=c;$('#cor').value=c;salvar();renderSwatches()};box.appendChild(b)})}
 function renderAngs(){const box=$('#angs');box.innerHTML='';const sp=cur();
   visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');b.appendChild(mini(sp,a.id));b.append(a.nome);
     const s=document.createElement('small');s.textContent=espelhado(a.id)?'espelhado':(temConteudo(pixDe(sp,a.id))?'pronto':'vazio');b.appendChild(s);
-    b.onclick=()=>{sel=a.id;renderEditor();renderAngs()};box.appendChild(b)})}
+    b.onclick=()=>{sel=a.id;renderEditor();renderAngs();renderAnims()};box.appendChild(b)})}
+/* ---------- animações ---------- */
+function quadroCanvas(arr,n){const c=document.createElement('canvas');c.className='px';c.width=c.height=n;if(arr)desenharEm(c,arr,n,1);return c}
+let timerAnim=null;
+function ordemAnim(A){const n=A.frames.length;if(A.loop&&n===3)return[0,1,0,2];return A.frames.map((_,i)=>i)}
+function renderAnims(){
+  const sp=cur();clearInterval(timerAnim);const w=$('#winAnim');const box=$('#anims');box.innerHTML='';
+  if(!sp||!sp.anim||!sp.anim.length){w.classList.add('hide');return}w.classList.remove('hide');
+  const players=[];
+  sp.anim.forEach((A,ai)=>{const d=document.createElement('div');d.className='anim';
+    const h=document.createElement('h3');h.textContent=A.nome+(A.loop?' (loop)':'');d.appendChild(h);
+    const pl=quadroCanvas(A.frames[0],sp.tam);pl.classList.add('play');d.appendChild(pl);players.push({A,pl,i:0});
+    const q=document.createElement('div');q.className='quadros';
+    A.frames.forEach((f,fi)=>{const id='a:'+ai+':'+fi;const b=document.createElement('button');b.className='ang'+(id===sel?' sel':'');b.appendChild(quadroCanvas(f,sp.tam));
+      const s=document.createElement('small');s.textContent=A.quadros&&A.quadros[fi]||('quadro '+(fi+1));b.appendChild(s);
+      b.onclick=()=>{sel=id;renderEditor();renderAngs();renderAnims()};q.appendChild(b)});
+    d.appendChild(q);box.appendChild(d)});
+  const fps=+$('#fps').value||6;
+  timerAnim=setInterval(()=>{players.forEach(p=>{const o=ordemAnim(p.A);p.i=(p.i+1)%o.length;const g=p.pl.getContext('2d');g.clearRect(0,0,p.pl.width,p.pl.height);desenharEm(p.pl,p.A.frames[o[p.i]],sp.tam,1)})},1000/fps);
+}
+$('#fps').onchange=()=>renderAnims();
+$('#bFolhaAnim').onclick=()=>{const sp=cur();if(!sp||!sp.anim||!sp.anim.length)return;const e=+$('#escala').value,n=sp.tam;
+  const cols=Math.max(...sp.anim.map(A=>A.frames.length));const c=document.createElement('canvas');c.width=cols*n*e;c.height=sp.anim.length*n*e;
+  sp.anim.forEach((A,r)=>A.frames.forEach((f,i)=>{const t=document.createElement('canvas');t.width=t.height=n*e;desenharEm(t,f,n,e);c.getContext('2d').drawImage(t,i*n*e,r*n*e)}));
+  baixarCanvas(c,slug(sp.nome)+'-animacoes.png')};
 function baixarCanvas(c,nome){c.toBlob(b=>{const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download=nome;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)},'image/png')}
 function slug(t){return(t||'sprite').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'sprite'}
 $('#bFolha').onclick=()=>{const sp=cur();const fs=visiveis().filter(a=>temConteudo(pixDe(sp,a.id)));if(!fs.length)return toast('Desenhe ou importe um ângulo primeiro');
