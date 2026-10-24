@@ -13,89 +13,199 @@
 <style>
 :root{
   --bg:#DCE8C8; --panel:#FBFAF2; --line:#3B5BA9; --line2:#A9BCEB;
-  --ink:#26304A; --muted:#5D6880; --gold:#F2A93B; --danger:#B8433A;
+  --ink:#26304A; --muted:#5D6880; --gold:#F2A93B; --danger:#B8433A; --ok:#3E8A4E;
   --check1:#E9ECE3; --check2:#D3D8CC;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#171D33;--panel:#232B4A;--line:#8AA2F0;--line2:#3D4B80;--ink:#EEF1FA;--muted:#A9B2CC;--gold:#F5B84F;--danger:#F07A6E;--check1:#2E3658;--check2:#262D4A;color-scheme:dark}
+  :root{--bg:#171D33;--panel:#232B4A;--line:#8AA2F0;--line2:#3D4B80;--ink:#EEF1FA;--muted:#A9B2CC;--gold:#F5B84F;--danger:#F07A6E;--ok:#7CCB8A;--check1:#2E3658;--check2:#262D4A;color-scheme:dark}
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif;min-height:100vh}
-h1,h2,h3,.tab,.btn{font-family:"Pixelify Sans","Atkinson Hyperlegible",system-ui,sans-serif}
-header{position:sticky;top:0;z-index:5;background:var(--line);color:#fff;display:flex;align-items:center;gap:12px;padding:10px 14px}
-header h1{font-size:1.25rem;margin:0;font-weight:700;flex:1}
-.tabs{display:flex;gap:6px}
-.tab{background:transparent;border:2px solid rgba(255,255,255,.55);color:#fff;border-radius:8px;padding:6px 14px;font-size:1rem;cursor:pointer}
+h1,h2,h3,.tab,.btn,.passo{font-family:"Pixelify Sans","Atkinson Hyperlegible",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--line);color:#fff;padding:10px 14px}
+header .topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:980px;margin:0 auto}
+header h1{font-size:1.2rem;margin:0;font-weight:700;flex:1;min-width:140px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:transparent;border:2px solid rgba(255,255,255,.55);color:#fff;border-radius:8px;padding:5px 12px;font-size:.98rem;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:#26304A}
 main{max-width:980px;margin:0 auto;padding:14px}
 .win{background:var(--panel);border:3px solid var(--line);border-radius:10px;box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 5px var(--line2);padding:16px 18px;margin-bottom:14px}
-.win h2{margin:0 0 8px;font-size:1.2rem}
+.win h2{margin:0 0 8px;font-size:1.2rem;display:flex;align-items:center;gap:10px}
 .win h3{margin:12px 0 6px;font-size:1rem}
+.passo{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#26304A;font-size:1rem;flex:none}
 p.hint{margin:0 0 10px;color:var(--muted);max-width:70ch}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
 label.f{display:flex;flex-direction:column;gap:3px;font-size:.88rem;color:var(--muted)}
+label.f.grow{flex:1;min-width:200px}
 select,input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line2);border-radius:6px;padding:6px 8px}
-textarea{width:100%;min-height:120px;resize:vertical;font-size:.9rem}
+textarea{width:100%;min-height:100px;resize:vertical;font-size:.9rem}
 input[type=color]{width:44px;height:38px;border:2px solid var(--line2);border-radius:6px;background:var(--bg);padding:2px}
-.btn{font-size:.98rem;background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer}
+.btn{font-size:.98rem;background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;display:inline-block}
 .btn.main{background:var(--line);color:#fff}
 .btn.on{background:var(--gold);border-color:var(--gold);color:#26304A}
 .btn.warn{border-color:var(--danger);color:var(--danger)}
+.btn.small{font-size:.85rem;padding:4px 9px}
 .btn:disabled{opacity:.45;cursor:default}
-button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,label.btn:focus-within{outline:3px solid var(--gold);outline-offset:2px}
 .hide{display:none!important}
-/* sprites */
+.status{font-size:.9rem;margin-top:8px;color:var(--muted)}
+.status.ok{color:var(--ok)}
+.status.erro{color:var(--danger)}
+.refimg{max-width:160px;max-height:160px;border-radius:6px;border:2px solid var(--line2)}
+.swatches{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.sw{width:28px;height:28px;border-radius:5px;border:2px solid var(--line2);cursor:pointer;padding:0}
+.sw.sel{outline:3px solid var(--gold);outline-offset:1px}
+canvas.px{image-rendering:pixelated;border-radius:3px;background:repeating-conic-gradient(var(--check1) 0 25%,var(--check2) 0 50%) 0 0/12px 12px}
+/* biblioteca */
+.cat{margin:14px 0 6px;font-family:"Pixelify Sans",system-ui,sans-serif;font-size:1.05rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.card{background:var(--bg);border:2px solid var(--line2);border-radius:8px;padding:8px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.card.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.card canvas{display:block;margin:0 auto 6px}
+.card small{display:block;color:var(--muted);font-size:.75rem}
+/* separador */
+.item{border:2px solid var(--line2);border-radius:8px;padding:10px;margin-top:10px;background:var(--bg)}
+.item .vistas{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.item .vistas figure{margin:0;text-align:center;font-size:.75rem;color:var(--muted)}
+.item canvas{width:72px;height:72px;display:block}
+/* editor */
 .grid2{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
 .edwrap{overflow:auto;display:flex;justify-content:center;padding:6px}
 #ed{touch-action:none;image-rendering:pixelated;border:2px solid var(--line2);border-radius:4px;max-width:100%}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.swatches{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.sw{width:28px;height:28px;border-radius:5px;border:2px solid var(--line2);cursor:pointer;padding:0}
-.sw.sel{outline:3px solid var(--gold);outline-offset:1px}
 .angs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .ang{background:var(--bg);border:2px solid var(--line2);border-radius:8px;padding:6px;cursor:pointer;text-align:center;font:inherit;color:var(--ink);font-size:.8rem}
 .ang.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
-.ang canvas{width:64px;height:64px;image-rendering:pixelated;display:block;margin:0 auto 4px;border-radius:3px}
+.ang canvas{display:block;margin:0 auto 4px}
 .ang small{display:block;color:var(--muted);font-size:.72rem}
-#prevOrig{max-width:140px;max-height:140px;border-radius:6px;border:2px solid var(--line2)}
-.badge{display:inline-block;background:var(--gold);color:#26304A;border-radius:5px;padding:1px 7px;font-size:.78rem;margin-left:6px}
+.badge{display:inline-block;background:var(--gold);color:#26304A;border-radius:5px;padding:1px 7px;font-size:.78rem}
 /* reuniao */
 .nota{white-space:pre-wrap;background:var(--bg);border:2px dashed var(--line2);border-radius:8px;padding:12px;font-size:.88rem;max-height:52vh;overflow:auto;user-select:text}
 .add{border-left:4px solid var(--gold);padding:6px 10px;margin:8px 0;background:var(--bg);border-radius:0 6px 6px 0}
 .add .meta{font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px;align-items:center}
 .add pre{white-space:pre-wrap;margin:4px 0 0;font:inherit;font-size:.88rem}
-#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Oficina de Jogos</h1>
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-tab="sprites">Sprites</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="reuniao">Reunião</button>
-  </nav>
+  <div class="topo">
+    <h1>Oficina de Jogos</h1>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="fluxo">Criar</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="biblioteca">Biblioteca</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="editor">Editor</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="reuniao">Reunião</button>
+    </nav>
+  </div>
 </header>
 
 <main>
-<!-- ============ SPRITES ============ -->
-<section id="tab-sprites">
+<!-- ================= CRIAR (FLUXO) ================= -->
+<section id="tab-fluxo">
   <div class="win">
-    <h2>Sprite atual</h2>
+    <h2><span class="passo">1</span>O que você quer criar</h2>
+    <p class="hint">Escolha a imagem de referência e descreva o pedido. O app monta o texto para você mandar ao Claude, já com o padrão do projeto.</p>
     <div class="row">
-      <label class="f">Nome<input type="text" id="nome" maxlength="40"></label>
-      <label class="f">Tamanho
-        <select id="tam"><option>16</option><option>24</option><option selected>32</option><option>48</option><option>64</option></select>
+      <label class="btn" for="refFoto">Escolher imagem</label>
+      <input type="file" id="refFoto" accept="image/*" class="hide">
+      <img id="refPrev" class="refimg hide" alt="Imagem de referência">
+    </div>
+    <div class="swatches" id="refCores" aria-label="Cores da referência"></div>
+    <div class="row" style="margin-top:10px">
+      <label class="f">Categoria
+        <select id="fCat"></select>
       </label>
+      <label class="f">Vistas
+        <select id="fVistas">
+          <option value="4">4 vistas (frente, lados, costas)</option>
+          <option value="1">Só a frente</option>
+          <option value="8">8 vistas (com diagonais)</option>
+          <option value="anda">Personagem andando (4 direções × 3 passos)</option>
+        </select>
+      </label>
+    </div>
+    <div class="col" style="margin-top:10px">
+      <label class="f">O que é<textarea id="fDesc" placeholder="Ex.: móveis de um quarto de adolescente, parecidos com os da imagem"></textarea></label>
+      <label class="f">Itens, um por linha (opcional)<textarea id="fItens" placeholder="Cama de solteiro&#10;Guarda-roupa&#10;Escrivaninha com computador"></textarea></label>
+      <label class="f">Observações (opcional)<input type="text" id="fObs" placeholder="Ex.: madeira mais escura, tons de verde"></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn main" id="bPedido">Copiar pedido para o Claude</button>
+    </div>
+    <p class="status" id="stPedido">Cole no Claude e anexe a mesma imagem.</p>
+  </div>
+
+  <div class="win">
+    <h2><span class="passo">2</span>Resposta do Claude</h2>
+    <p class="hint">Cole aqui a resposta inteira do Claude. O app separa o prompt para o GPT e a ficha que ele usa no passo 3.</p>
+    <textarea id="fResp" placeholder="Cole a resposta do Claude"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn main" id="bPromptGPT">Copiar prompt para o GPT</button>
+      <button class="btn" id="bAddReuniao">Guardar a adição na Reunião</button>
+    </div>
+    <p class="status" id="stResp">Aguardando a resposta.</p>
+  </div>
+
+  <div class="win">
+    <h2><span class="passo">3</span>Folha do GPT</h2>
+    <p class="hint">Escolha a imagem que o GPT gerou. O app tira o fundo magenta, ajusta à grade de pixels e separa cada objeto e cada vista.</p>
+    <div class="row">
+      <label class="btn" for="folha">Escolher folha</label>
+      <input type="file" id="folha" accept="image/*" class="hide">
+      <label class="f">Largura real do 1º objeto (px)<input type="number" id="refPx" value="32" min="4" max="128" style="width:110px"></label>
+      <button class="btn main" id="bSeparar" disabled>Separar sprites</button>
+    </div>
+    <p class="status" id="stFolha">A largura vem da ficha do Claude. Se o resultado sair borrado ou pequeno demais, ajuste e separe de novo.</p>
+    <div id="itensFolha"></div>
+    <div class="row hide" id="rowSalvar" style="margin-top:12px">
+      <button class="btn main" id="bSalvarFolha">Salvar na biblioteca</button>
+    </div>
+  </div>
+
+  <div class="win">
+    <h2><span class="passo">4</span>Pronto</h2>
+    <p class="hint" style="margin:0">Os sprites salvos aparecem na Biblioteca. De lá, abra qualquer um no Editor para retocar ou baixar o PNG.</p>
+  </div>
+</section>
+
+<!-- ================= BIBLIOTECA ================= -->
+<section id="tab-biblioteca" class="hide">
+  <div class="win">
+    <h2>Biblioteca</h2>
+    <p class="hint">Toque num sprite para abrir no Editor.</p>
+    <div class="row">
+      <button class="btn" id="bBaixarCat">Baixar folha da categoria</button>
+      <select id="selCatBaixar" aria-label="Categoria para baixar"></select>
+      <button class="btn" id="bRestaurar">Restaurar a sala base</button>
+    </div>
+    <div id="biblio"></div>
+  </div>
+</section>
+
+<!-- ================= EDITOR ================= -->
+<section id="tab-editor" class="hide">
+  <div class="win">
+    <div class="row">
+      <label class="f grow">Nome<input type="text" id="nome" maxlength="40"></label>
+      <label class="f">Categoria<select id="eCat"></select></label>
+      <label class="f">Tamanho
+        <select id="tam"><option>16</option><option>24</option><option>32</option><option>48</option><option>64</option></select>
+      </label>
+    </div>
+    <div class="row" style="margin-top:8px">
       <button class="btn" id="bDiag">Diagonais: não</button>
-      <button class="btn" id="bEsp">Espelhar esquerda: sim</button>
-      <button class="btn warn" id="bNovo">Novo sprite</button>
+      <button class="btn" id="bEsp">Espelhar esquerda: não</button>
+      <button class="btn" id="bDuplicar">Duplicar</button>
+      <button class="btn warn" id="bExcluir">Excluir</button>
     </div>
   </div>
 
@@ -110,7 +220,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         <button class="btn" data-tool="conta">Conta-gotas</button>
         <input type="color" id="cor" aria-label="Cor">
         <button class="btn" id="bUndo">Desfazer</button>
-        <button class="btn" id="bGrade">Grade</button>
+        <button class="btn on" id="bGrade">Grade</button>
       </div>
       <div class="edwrap"><canvas id="ed"></canvas></div>
       <div class="swatches" id="swatches" aria-label="Cores do sprite"></div>
@@ -120,7 +230,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         <button class="btn warn" id="bLimpar">Limpar ângulo</button>
       </div>
     </div>
-
     <div>
       <div class="win">
         <h2>Ângulos</h2>
@@ -140,32 +249,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   </div>
 
   <div class="win">
-    <h2>Da foto para o pixel</h2>
-    <p class="hint">Escolha uma foto. O app reduz, limita as cores no estilo GBA e coloca no ângulo selecionado. Funciona sem internet.</p>
-    <div class="row">
-      <input type="file" id="foto" accept="image/*">
-      <img id="prevOrig" class="hide" alt="Foto escolhida">
+    <h2>Colar um sprite em texto (JSON)</h2>
+    <p class="hint">Para quando o Claude mandar um sprite em JSON. Ele entra na biblioteca como um sprite novo.</p>
+    <textarea id="txtGrade" placeholder="Cole aqui o bloco JSON"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn main" id="bImportar">Adicionar à biblioteca</button>
+      <label class="btn" for="arqJson">Abrir arquivo .json</label>
+      <input type="file" id="arqJson" class="hide" accept=".json,application/json">
     </div>
-    <div class="row" style="margin-top:10px">
-      <label class="f">Cores<select id="kcores"><option>6</option><option>8</option><option selected>12</option><option>16</option></select></label>
-      <label class="f">Fundo<select id="fundo"><option value="1" selected>Remover fundo</option><option value="0">Manter</option></select></label>
-      <label class="f">Contorno<select id="contorno"><option value="borda" selected>Escurecer borda</option><option value="fora">Contorno de fora</option><option value="nenhum">Nenhum</option></select></label>
-      <label class="f">Tolerância do fundo<input type="number" id="tol" value="40" min="5" max="120"></label>
-      <button class="btn main" id="bPixel" disabled>Pixelizar no ângulo</button>
-    </div>
-  </div>
-
-  <div class="win">
-    <h2>Pedir os ângulos ao Claude</h2>
-    <p class="hint">Copie o pedido, cole no Claude junto com a foto e depois cole aqui a resposta. Os ângulos chegam prontos.</p>
-    <button class="btn main" id="bPedido">Copiar pedido</button>
-    <h3>Resposta do Claude</h3>
-    <textarea id="txtGrade" placeholder="Cole aqui o bloco JSON que o Claude mandou"></textarea>
-    <div class="row" style="margin-top:8px"><button class="btn main" id="bImportar">Colocar nos ângulos</button></div>
   </div>
 </section>
 
-<!-- ============ REUNIÃO ============ -->
+<!-- ================= REUNIÃO ================= -->
 <section id="tab-reuniao" class="hide">
   <div class="win">
     <h2>Nota da reunião</h2>
@@ -186,7 +281,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   </div>
   <div class="win">
     <h2>Backup do app</h2>
-    <p class="hint">Salva o sprite e a reunião num arquivo, para guardar ou levar para outro aparelho.</p>
+    <p class="hint">Salva a biblioteca e a reunião num arquivo, para guardar ou levar para outro aparelho.</p>
     <div class="row">
       <button class="btn" id="bExport">Salvar backup</button>
       <label class="btn" for="arqBackup">Abrir backup</label>
@@ -198,277 +293,430 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 <div id="toast" role="status"></div>
 
 <script>
+const BASE = [{"slug":"sofa","cat":"sala","json":{"nome":"Sofá","tamanho":32,"paleta":{"a":"#080008","b":"#080808","c":"#080810","d":"#100810","e":"#101020","f":"#102040","g":"#182850","h":"#183058","i":"#203060","j":"#203870","k":"#204078","l":"#204080","m":"#284888","n":"#284890","o":"#285098","p":"#302018","q":"#305080","r":"#305090","s":"#305098","t":"#305898","u":"#3058a0","v":"#3060a8","w":"#3860a0","x":"#3860a8","y":"#3860b0","z":"#4068b8","A":"#4070b0","B":"#4870b8","C":"#4878c0","D":"#4880c0","E":"#503020","F":"#583820","G":"#5890d0","H":"#603820","I":"#6090d0","J":"#6898d8","K":"#80b0e0"},"angulos":{"frente":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","......bbbbbbbbb..bbbbbbbbbb.....","....bGGGGGGGGGGmuGGGGGGGGGGf....","...GhGKKKKKKKKGtGKKKKKKKKKGfG...","...AfBBBBBBBBBAmGBBBBBBBBAAhv...","...ohvvvvvvvvvvmvvvvvvvvvvvhm...","..bffvvvvuvvvvvmvvvvvvvvvvuhhb..",".bGBtktuuuuuuuukovvuuuuuuoktGGb.","bGGGvhmmmoommkmkmmmmmmmmmmfuGGGb","bGKGkfhhhhhhhhhhfhhhhhhhhffkGKGb","bAoAkfGGGGGGGGGmBGGGGGGGGAhkBoAb","booohtGGGGGGGGGtGGGGGGGGGGAfooob","booohGKKKKKKKKKtGKKKKKKKKKKfooob","booohAuuuvvvvvvmvvvvvvvvvvvhooob","bmoohuuuuuvvuuukovuuuvvuuuuhoomb",".ftohfhhhhhhhffffhhhhhhhhhffoohb",".bkkfmkkmmmmkkkmkkkkkkkkkkmkkkb.","..ppbbbbbbbbbbbbbbbbbbbbbbbbpp..","..bpb......................bpb.."],"direita":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................ccce............","...............JJJJwCc..........","...............JJJJCCz..........","..............eJzzzwJJc.........","..............iCyyxizlc.........","..........iaaalzyyliulc.........",".........awJJJryyuilulc.........","........criiiiillliuulc.........","........crJJJJJJJJJCllc.........","........cJzzyyyyyxxzila.........","........aCyyyyyyyyyxilc.........","........cCyyyyyyyyyyila.........","........eCuyyyyyyyyxilc.........","........culluuuuuuuuil..........",".........lilllllllllil..........",".........ceeeeecceecca..........",".........cHHa.....eHHc..........","..........aa......ccac.........."],"esquerda":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...........accc.................",".........ckDJJJh................",".........dsDJJJh................","........cJuuyyyDa...............","........anyhuxxDd...............","........dnshnxxDdaaa............","........cnnhksxyhJJJha..........","........cnnkhkkkhkkkkxd.........","........ankJJJJJJJJJDnc.........","........ckxxxyyxyyyyyJc.........","........cksxyyyyyyyyuDc.........","........ckuyyyyyyyyyuDd.........","........dnsxxyyyyyyskxd.........","........cknsuuuusssknn..........","........akkkkkkkkknhkk..........",".........dddccccdddddc..........",".........aFFc.....aFF...........",".........cadd.....aad..........."],"costas":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................",".....bbbbbbbbbb..bbbbbbbbbb.....","....eIIIIIIIIIIxjIIIIIIIIIIe....","...IqIIIIIIIIIIIxIIIIIIIIIIgIb..","...xgssssssssssnmsssssssssmgsb..","...nxxssssssssssssssssssssxsmb..","..bgnnmmmmmmmmmmmmmmmmmmmmnxgb..",".eIqnnmmmmmmmmnmmmmmmmmmmmmmgIe.","bIIqmnnnmnnnmmmmmmmmmmmmmmmmgIIb","bIIqmnmnnnnmnmmmmmmmmmmmmmmngIIb","bxmjnnmnnnmnmnmmmmmmmmmmmmmngmxb","bnmjnnnnmnmnnnmmmmmmmmmmnmmnjmnb","bmmjnnnnnmmmnnmmmmmmmmmmmmmmgmmb","bmmjnnnmnnnnmnmnnnnnnmnmnmnnjnnb","bnnjmmmmnnnnnnnnnnnnnnnnmnnmgmmb","bmnjmmmmmnnnmmmmmmmmmmmmnnmmgmjb",".ejgjjjjjjjjjjjjjjjjjjjjjjjjegb.","..eEb......................bEE..","..bb........................bb.."]}}},{"slug":"poltrona","cat":"sala","json":{"nome":"Poltrona","tamanho":32,"paleta":{"a":"#080008","b":"#080808","c":"#080810","d":"#100010","e":"#100808","f":"#100818","g":"#101010","h":"#101018","i":"#101830","j":"#182858","k":"#183058","l":"#183060","m":"#203068","n":"#203868","o":"#203870","p":"#204070","q":"#204078","r":"#204080","s":"#204880","t":"#284888","u":"#284890","v":"#285090","w":"#305898","x":"#3058a0","y":"#3860a8","z":"#3860b0","A":"#3868b0","B":"#4068a8","C":"#4070b0","D":"#4878c0","E":"#4880c0","F":"#503020","G":"#5078c0","H":"#5080c8","I":"#583020","J":"#583818","K":"#5888c8","L":"#6090d0","M":"#6898d8","N":"#70a8e0","O":"#80b0e0"},"angulos":{"frente":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...........ccccccccccc..........",".........jjKNNNNNNNNNDDc........",".........tjKDDEEEEDDEEA.........",".........qjAAAAAAAAAAAwc........",".......ccjjyyyyyyyyyywjcc.......","......iDEyjwyyyyyyyyytAKKn......","......cKKAjtwwwwwwwwwjEKKw......","......cNKAijnnnnjnnnniDNNy......","......cNAyjnwAAAAAyyqitEyy......","......cwttjDEEEEDDDEEtnttn......","......cttqwKKKKKKKKKEEjttn......","......cttqAEKKKKKKKKEEjttq......","......cttttwwwwwwwwwwynttj......","......ctttjttqqqqttttjjtti......",".......nqqqnnqqqqqqnnqnqqi......",".......cccciiiiiiiiiiiccc.......",".......cFF............FFF.......","........cc............ccc......."],"direita":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................bbbb............","...............hMMMGlb..........","...............hMMMGBb..........","...............GGAzvGB..........","..............dMAAAsvs..........","..........dMMMlMAAvyvs..........",".........hGGyyoAyvoyvs..........",".........dsllllllllvvo..........",".........hoMMMMMMMMGoo..........",".........dMAAzzzzzzyss..........",".........bGzzzzzzzzzss..........",".........hAzzzzzzzzzss..........",".........dyyzzzzzzzzls..........",".........hvsssvvsssvos..........",".........blllooollooll..........","..........ddhbddddbbbd..........","..........dJJd....dJJd..........","..........ddd......ddd.........."],"esquerda":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","............dbg.................","..........HoHOOL................","..........LoHHOOb...............",".........dLtxAALt...............",".........gtxoAAHLddb............",".........bttoAAAHLLLk...........",".........btxmtxzxxzxAx..........",".........gttkmmmkkkkkt..........",".........btoHLLLHLLHHk..........",".........bmAAzzzzzzzzH..........",".........bmzzzzzzzzzxA..........",".........gmzzzzzzzzzxA..........",".........gmxzzzzzzzxtx..........",".........bktxtttttttot..........",".........bkooommoomkkk..........","..........dggbddbdgggb..........","..........dJJb....dJJ...........","..........bdd......bd..........."],"costas":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...........acaaccaccc...........",".........frLLLLLLLLLLpc.........",".........rrCCCCCCCCCCpx.........",".........jpLLLLLLLLLLpu.........",".......ccjCuutttttttuxjfc.......","......eCLjuuttttttttttjCLc......","......aLLjttttuttttttrjLLf......","......aLLjttttttttutttjLLa......","......eLCjuuuttutttttujCxc......","......cxtjuutttuuttttujrrc......","......cttjuttttuttuuttjrrc......","......atujttttttuuttttjruc......","......curjtttttuttttttjuuc......","......crtjttuutttttttujuua......","......eprjrrrrrrrrrrrrjppa......",".......eeeacaccccccccccec.......",".......eIIc..........eIIf.......","........ae............ec........"]}}},{"slug":"mesa-de-centro","cat":"sala","json":{"nome":"Mesa de centro","tamanho":32,"paleta":{"a":"#080008","b":"#080808","c":"#080810","d":"#100808","e":"#100810","f":"#101010","g":"#181010","h":"#201010","i":"#201810","j":"#281810","k":"#302018","l":"#382018","m":"#382818","n":"#503020","o":"#583820","p":"#684020","q":"#704020","r":"#784820","s":"#804828","t":"#805028","u":"#885028","v":"#986030","w":"#987038","x":"#a87038","y":"#b07840","z":"#c08040","A":"#c88848","B":"#c89048","C":"#c89050","D":"#d09050","E":"#d09850","F":"#d09858","G":"#d89858","H":"#d8a058","I":"#e0a058","J":"#e0a060"},"angulos":{"frente":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...fffdddddddbbdddddddddddfd....","...JHHHHHHHHHHHHHHHHHHHEEHHE....","...EzzzzzzzzzzzAAzzzzzzzzzzzj...","...ADEEEEEEEEEEEEEEEEEEDDDEEq...","..bAzzAAzzzzzzzzzzzzAAAAzzzzu...","..fDAAAAAAAAAAADDAAAADDAAAzzu...","..fEDAAAAADDDDDDDDDDDDDDDDAAu...","..dHHHHHHHHHHHHHJJHHJJJHHHJJu...","..fuuuuuuuuuuuuuuuuuuuuuuuuun...","..dnnnnnnnnnnnnnnnnnnnnnnnnnj...","...nqqnrrqqrrrrrrrrrrrqrrnqnd...","...qurfddbbbbbbbbbdbbbbddfuub...","...rur...................duud...","...fjd...................bjfb..."],"direita":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","........ehedddddddaaae..........","........dHFHHHFFFFFFFFa.........","........dDzzAAAAzzAAAFe.........","........aADAAAADDDAAAAk.........","........axFFDDDDFFFDAAx.........",".........ozzzzzzzzzzzzxa........",".........hDADDDDDDDDDDFe........",".........exHHHHFFHHFHHHd........",".........ettttttttttttta........",".........ekkkkkkkkkkkkda........","..........koottttttotoc.........","..........otoecaaacettc.........","..........ott.......xta.........","..........eec.......ee.........."],"esquerda":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","..........dbbbddbbabadeb........",".........bEEEEEEEEEEEECa........",".........hECCzCCCCCzzzyb........",".........mECCCCCCCCCCCva........","........hyCEEEECCEEEEEra........","........byzzzzzzzzzzzym.........","........eECCCCCEEEEECCd.........","........eyIEIIIIIIIIIzb.........","........brruuuuuuuuuurb.........","........admmmmmmmmmmmhb.........",".........eurrruuuurmrh..........",".........hvrdbaaaebmuh..........",".........avu.......ruh..........","..........ee.......bee.........."],"costas":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...geedddddddddddddddddbbege....","..dzGGGGGGGGGGGGGGGGGGGGGGGi....","..gDzzzzzzzzzzzzzzzzzzzzzzzwb...","..gGBBDDDDDDDDDDDDDDDDDDDBABe...","..bDzzzzzzzzzzzzzzzzzzzzzzzzb...","..dDzAAAAAAAAAAAAAAAAAAAzzzBb...","..gGBBDDDDDDDDDDDDDBBBBBBBBBb...","..dGGGGGGGDDDDDDDDDDDDDDGGDBb...","..bsssssssssssssssssssssssssb...","..dilllllllllllllllllllllllib...","...iplssssssssssssssssspsppg....","...gsleedbbbbbbbbbbbbbeebpsb....","...esl...................pse....","...ele...................eie...."]}}},{"slug":"tv-com-rack","cat":"sala","json":{"nome":"TV com rack","tamanho":32,"paleta":{"a":"#000008","b":"#080008","c":"#080808","d":"#080810","e":"#100808","f":"#100810","g":"#101010","h":"#181010","i":"#181818","j":"#201810","k":"#201818","l":"#202020","m":"#202828","n":"#282828","o":"#283028","p":"#303030","q":"#303830","r":"#383830","s":"#383838","t":"#384040","u":"#402820","v":"#404848","w":"#485050","x":"#505850","y":"#603820","z":"#606860","A":"#684020","B":"#704828","C":"#707878","D":"#885828","E":"#885830","F":"#905830","G":"#986838","H":"#a06830","I":"#b07038","J":"#b07840","K":"#b88040","L":"#d89858","M":"#d8a058","N":"#d8a060","O":"#e0a860"},"angulos":{"frente":["................................","................................","................................","................................","................................","................................","................................","..ddcddddcddddddddddddddddddcc..","..gCCCCCCCCCCCCCCCCCCCCCCCCCwd..","..dwiliiillimrrrlrliiilllligrg..","..crimmmmrwrwwwwmwmmmmmmmmmird..","..crimmmrmwwwwwrrmmmmmmmmmmiwd..","..crimmwmwwwwwrrmmmmmmmmmmmiwg..","..crimrmwwwwwlrmmmmmmmmmmmmiwd..","..crimrwwwwwmwlmmmmmmmmmmmmiwd..","..criwrwwwwmwmmmmmmmmmmmmmmiwg..","..drgmwwwwmwmmmmmmmmmmmmmmmgwg..","..crgwwwwlwmmmmmmmmmmmmmmmmlwd..","..drirmrlmiiiliiiiiiiiiiilmlrc..","..gmrrrrrrrrrrrrrrrrrrrrrrrrmd..","...dcccddddggggmmgiigccdddccc...","..lHHHHEEgmrrrwwrrrrrrlEEEHHEg..",".gEHHHHHEcdggillgggggicEHHHHHEd.",".cNNNNNNNNNNNNNNNNNNNNNNNNNNNNb.",".dEEEEEEEEEEEEEEEEEEEEEEEEEEEEd.",".gEAAAAAAAiigggiiiiiiiAAAAAAAEd.",".cEHHHEHHAglrrrrrrrmllHHHAEHHEb.",".gEHHHHHHEiAEHHHHHHHErHHHAHHHAb.",".cEAAAAAAAmAAAAAAAAAAAAAAAAAAEc.",".dEEEEEEEEEEEEEEHEEEEEEEEEEEEEd.","..gggbdcbddcbbccddcbccbbddcggc..","...cdc.....................dc..."],"direita":["................................","................................","................................","................................","................................","................................","................................","..............ccc...............","..............azt...............","..............aztf..............","..............fztb..............","..............czoa..............","..............czoa..............","..............bzoc..............","..............fzoa..............","..............czota.............","..............bzooc.............","..............czooc.............","..............fzooa.............","..............atogc.............","..........fBBBatogoBBf..........","..........cJJFoojogFFb..........","..........aJJjtoottFJg..........","..........cLJcccaacJJg..........","..........cLLLLLLLLLLc..........","..........cBBBBBBBBBBb..........","..........gFFFFFFFFFFb..........","..........aFFFFFFFFFFg..........","..........cFFFFFFFFFFg..........","..........aBBBBBBBBBBc..........","...........fjjbabcjjb...........","............ffc..bbfb..........."],"esquerda":["................................","................................","................................","................................","................................","................................","................................","................ea..............","...............xxa..............","..............kxxa..............","..............axxe..............","..............expa..............","..............expa..............","..............expa..............",".............ccxpa..............",".............cxxpc..............",".............epxpa..............",".............epxpa..............",".............cpxpe..............",".............ehxpc..............","..........hByyhxpayByh..........","..........cKGkpkppGKGe..........","..........hKDxpppxkKKa..........","..........hKGecceeyKKe..........","..........eMMMMMMMMMMc..........","..........cBBBBBBBBBBe..........","..........cDDDDDDDDDDh..........","..........eDDDDDDDDDDc..........","..........hDDDDDDDDDDe..........","..........eByyyBByyyya..........","...........ekhccdekkd...........","...........addd..add............"],"costas":["................................","................................","................................","................................","................................","................................","................................","..fgffffffffffffffffcffffccfgf..","..fzzzzzzzzzzzzzzzzzzzzzzzzzzs..","..gvqssqqqqqqqqqqqqqqqqqqqqqqs..","..gvssssssssssssssssqsssssqqqq..","..cvsnzssssssssssqqqssssssnqqq..","..fvsqzssssssssqqqsssssqqsnsqq..","..fvsnzsssssssqqsqqsssqqqsnqqq..","..gvsnzssssqnnnnnnnnnsqqssnqqq..","..gsqnzssssqnnnnnnnniqqsssnqqq..","..gvqnzssssnnnnnnnnniqssssiqqq..","..cvsnvqsssniiiiiiiiisqqssnqqq..","..fssnvqqssssqizzqnsssqqqsnsqq..","..giigiiiiiiiicvsqgiiiiiggiiif..","....cccffcciiiivsqgggggfccccc...","..iIIFFFFivsssvvvvsssqgBFFFFIu..",".fFIIIIIFcgfcfggggggffcFIIIIIIf.",".fOOOOOOOOOOOOOOOOOOOOOOOOOOOOB.",".fFBBBBBBBBBBBBBBBBBBBBBBBBBBBu.",".gFFFFFFFFFFFFFFFFFFFFFFFFFFFBu.",".gFFFFFFFFFFFFFFFFFFFFFFFFFFFFu.",".fFFFFFFFFFFFFFFFFFFFFFFFFFFFFu.",".fFFFFFFFFFFFFFFFFFFFFFFFFFFBFu.",".fBBBBBBBBBBBBBBBBBBBBBBBBBBBBu.","..fggccfccccccccccccccccfffggf..","...ff......................ffc.."]}}},{"slug":"luminaria","cat":"sala","json":{"nome":"Luminária","tamanho":32,"paleta":{"a":"#000800","b":"#080008","c":"#080808","d":"#080810","e":"#100808","f":"#100810","g":"#101010","h":"#180808","i":"#180810","j":"#181010","k":"#201810","l":"#280828","m":"#301818","n":"#302018","o":"#403020","p":"#604028","q":"#684830","r":"#785030","s":"#785838","t":"#886038","u":"#907048","v":"#a08050","w":"#a88050","x":"#b8a070","y":"#d0b888","z":"#d0c088","A":"#d8c098","B":"#d8c8a0","C":"#e8d8a8","D":"#e8d8b0","E":"#f0e8b8","F":"#f0e8c0","G":"#f8e8c0","H":"#f8f0c8","I":"#f8f0d0","J":"#f8f0e8","K":"#f8f8d8"},"angulos":{"frente":["................................","................................","................................",".............eecceh.............","............jyyyyyyc............","...........eJuruuuuIf...........","...........eyGIIIGGye...........","...........CGyyyyyyyu...........","...........GIIIIICCyyl..........","..........hCIGIIIGCCCo..........","..........oGIGIIIICCyo..........",".........fGGICIIIICCyyf.........",".........fCGIGIIIICCCyf.........","..........huyyCCCCyyue..........","............cefececce...........","...............oe.e.............","...............oj.f.............","...............rj.l.............","...............uh.yl............","...............uh...............","...............uh...............","...............uh...............","...............uj...............","...............uj...............","...............uh...............","...............uh...............","...............rh...............","............feeujehh............","...........euuuoorrre...........","...........cruuuuuurc...........","...........horrrrroje...........",".............eeeefe............."],"direita":["................................","................................","................................","................................","..............fccdf.............","............fcwwwwod............","............fGIKKGzc............","............zGzzzzzz............","............DKGIIDDD............","...........fGKGIIDDDq...........","...........dGIGIIDDzw...........","..........cDKIIIIDDzzn..........","..........fGKGIIIIDDzo..........","...........izzGGGDzzif..........","............fiidccdd............","...............on.i.............","...............on.f.............","...............on.i.............","...............qoizc............","...............qn.i.............","...............qo...............","...............qo...............","...............so...............","...............so...............","...............qn...............","...............qn...............","...............so...............",".............fisocc.............","............swwqoqsq............","............swwwwssq............","............fqsqqqod............",".............icccdd............."],"esquerda":["................................","................................","................................","................................","..............fbbfc.............",".............cvvvvvf............",".............yIIIFyc............","............rFyyyyBy............","............yIFIIFDB............","...........mDIDIIIDBr...........","...........gFIFIIIDBv...........","..........fDIIIIIIDBBg..........","..........bDIFIIIIDBBm..........","...........gyyDDDDyyg...........",".............fcbgbff............",".............b.bma..............",".............b.cpc..............",".............c.bpa..............",".............ycbpb..............",".............b.grb..............","...............bpa..............","...............crc..............","...............grf..............","...............gra..............","...............gpa..............","...............cpa..............","...............bpf..............",".............fbbpc..............","............mvvrpprp............","............pvvvvrrp............","............mmrrpppc............","..............cbacc............."],"costas":["................................","................................","................................",".............ffccff.............","............fxAAAAxc............","...........fItttttxH............","...........cAHHHHIExf...........","...........AEAAAAADAt...........","...........HHHHIIDDAx...........","..........pEIEHIIHDAAf..........","..........pEIEIIIHDAAf..........",".........fDHIDIIIHDAAAc.........",".........fDHIEIIIIDAAAb.........","..........fxADDAAAAxof..........","...........fccccffcc............","...............kk...............","...............oo...............","...............po...............","...............po...............","...............to...............","...............to...............","...............to...............","...............to...............","...............to...............","...............to...............","...............to...............","...............to...............","............bbctofff............","...........ftttppttpb...........","...........btxtttttpb...........","...........fopttpppkb...........",".............bfbbbb............."]}}},{"slug":"planta","cat":"sala","json":{"nome":"Planta","tamanho":32,"paleta":{"a":"#080808","b":"#100810","c":"#101010","d":"#180810","e":"#181018","f":"#181810","g":"#182018","h":"#183820","i":"#200810","j":"#203820","k":"#204020","l":"#204028","m":"#284828","n":"#285828","o":"#300828","p":"#302020","q":"#306830","r":"#307030","s":"#381018","t":"#387030","u":"#387830","v":"#408030","w":"#482020","x":"#488838","y":"#502818","z":"#509038","A":"#509838","B":"#582818","C":"#589838","D":"#60a040","E":"#68b040","F":"#68b848","G":"#70b848","H":"#783820","I":"#78b848","J":"#78c048","K":"#904020","L":"#984828","M":"#a04828","N":"#a85028","O":"#b85830","P":"#b86030","Q":"#c05830","R":"#c87038","S":"#d07038","T":"#d87838","U":"#e08048","V":"#e08848"},"angulos":{"frente":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","...................acaa.........","..........ccco...cmGGDc.........","..........oDDGGo.GGDGa..........","...........hGDDqcDzGh...........","............hDzvhvDqo...........",".........mmmmqvqmqqmmqm.........","........mGGDzqmqmmmvzGGq........",".......azzzzqqqhqmvvDGGDa.......",".......caachhhhmmmhmhcacc.......","..........cvqqhhmhhmvq..........",".........oGGzvmqqmqzDDD.........",".........azaaaczqqccaav.........",".........a.cLLcqvhyLc.a.........","...........PyyyhzcyyLa..........","...........PVccccccyPa..........","...........LPVVVVVVVLc..........","...........aLLPLLLLLy...........","............PPLLLLLLa...........","............LPPPPPPLa...........","............LPPPPPPLa...........","............cLPPPPLy............",".............aaaaaaa............"],"direita":["................................","................................","................................","................................","................................","................................","................................","................................","................................","...............aad..............","..............wFFa..............","............lwFFrdad............","............llArrFFFe...........",".............elrAFFe............","..........eFFrlrrra.............",".........dFFFArlle.d............",".........drlllrllrAAFe..........","..........aellllrAFFFFa.........","..........sFArllllrFFAa.........",".........eFFFAlrllleald.........",".........dAlllArAlrAa...........","............alFAFdd.............","..........dHKlFFrHKs............","..........aKwwlAewwNa...........","..........aRReddddRKa...........","..........dNNQQQQNNHd...........","...........wKKKKKKHd............","...........sQQQNNKKd............","...........dKRQQQKHa............","............HQQQNKw.............","............dHKKKKa.............",".............aaaaa.............."],"esquerda":["................................","................................","................................","................................","................................","................................","................................","................................","................................","..............gbb...............","..............iJEp..............","............bbiCECpg............","...........bJJJnuunp............","............gCJunng.............",".............buunkCCJb..........","............b.gnnCEJJCi.........","..........gJCuuknnnkgkb.........",".........bJJJJCukkggb...........",".........bEEEukknnuCJb..........",".........buggkkknkCEEEb.........","............CukCCukkgub.........",".............ibEEEkb............","............iKKpEkpKKi..........","...........bOyypCgyyKi..........","...........iTTbbgiiTOi..........","...........iKOOOOOOKKb..........","............yKKKKKKKp...........","............iOTOOOOKi...........","............bKOOOOOKb...........",".............yOOOOKy............",".............bKKKKKi............","..............bbbbb............."],"costas":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................",".........aaaa...................",".........fEIIDa...Bfff..........","..........fEEDE..IIEEf..........","...........jIDxjtDDIj...........","............nxtnxxDj............",".........jnnjnnntttjjnt.........","........tIDxxnjnnnnxDEEn........",".......aDEEtttjnjntxxDDxa.......",".......aaafjjjnnjjjjjfaaa.......","..........ttnnjnjjnnxj..........",".........xDEDnjtnntxEDj.........",".........taaaajxtffaatj.........",".........a.fMBfDtfMMa.a.........","..........aOBBfxnBBBOa..........","..........aSMffafffSOa..........","..........aOSUUSUUSMMa..........","..........aBMOOMMOMBa...........","...........aOOMMMMMMa...........","...........aOSOOOOMMa...........","...........aMOOOOOMBa...........","............BMOOOMMa............",".............aaaaaa............."]}}}];
+</script>
+<script>
 (()=>{
+/* ================= padrão do projeto ================= */
+const ESTILO_FIXO='ESTILO FIXO (não mudar): folha de sprites em pixel art, estilo interiores de GBA/DS como Pokémon HeartGold e FireRed. Mesma vista frontal levemente de cima da folha da sala. Escala: bloco de 16x16 px; adulto chibi com 1 bloco de largura e 2 de altura; sofá de 2 lugares com 2 blocos de largura. Pixels nítidos sem antialiasing, 4 a 6 tons por material, luz de cima à esquerda, contorno escuro só na silhueta. Cada objeto em 4 vistas na mesma linha: frente, lado direito, lado esquerdo, costas. Fundo magenta sólido (#FF00FF), sem sombras, sem textos e sem números, itens separados e alinhados em grade.';
+const REGUA='1 bloco = 16x16 px ≈ 1 metro. Adulto 16x32 (chibi, figura ~16x24) | Criança 16x24 | Porta 16x32 | Geladeira 16x32 | Cama 16x32 | Cadeira 16x16 | Planta 16x24 | Mesa 32x24 | Sofá 32x24 | Animal pequeno 12x12 | Carro 64x28 | Casa pequena 80x80.';
+const CATS=['sala','quarto','cozinha','banheiro','escritório','loja','cidade','natureza','personagem','criatura','item','outro'];
 const ANG=[
-  {id:'frente',nome:'Frente'},
-  {id:'costas',nome:'Costas'},
-  {id:'direita',nome:'Direita'},
-  {id:'esquerda',nome:'Esquerda',esp:'direita'},
-  {id:'fd',nome:'Frente-direita',diag:1},
-  {id:'fe',nome:'Frente-esquerda',diag:1,esp:'fd'},
-  {id:'cd',nome:'Costas-direita',diag:1},
-  {id:'ce',nome:'Costas-esquerda',diag:1,esp:'cd'}
+  {id:'frente',nome:'Frente'},{id:'direita',nome:'Direita'},{id:'esquerda',nome:'Esquerda',esp:'direita'},{id:'costas',nome:'Costas'},
+  {id:'fd',nome:'Frente-direita',diag:1},{id:'fe',nome:'Frente-esquerda',diag:1,esp:'fd'},{id:'cd',nome:'Costas-direita',diag:1},{id:'ce',nome:'Costas-esquerda',diag:1,esp:'cd'}
 ];
-const ALIAS={frente:'frente',front:'frente',costas:'costas',tras:'costas','trás':'costas',back:'costas',direita:'direita',right:'direita',esquerda:'esquerda',left:'esquerda',
+const ALIAS={frente:'frente',front:'frente',costas:'costas',tras:'costas','trás':'costas',back:'costas',direita:'direita','lado direito':'direita',right:'direita',esquerda:'esquerda','lado esquerdo':'esquerda',left:'esquerda',
   'frente-direita':'fd',fd:'fd','frente-esquerda':'fe',fe:'fe','costas-direita':'cd',cd:'cd','costas-esquerda':'ce',ce:'ce'};
-const KEY='oficina-jogos-v1';
+const KEY='oficina-jogos-v2', KEY1='oficina-jogos-v1';
 const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
-let S=carregar()||novoEstado();
-let sel='frente', tool='lapis', grade=true, undo=[], imgFoto=null;
-
-function novoEstado(){return{nome:'sofa',tam:32,diagonais:false,espelhar:true,cor:'#304878',angulos:{},adicoes:[],criado:Date.now()}}
-function carregar(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
+/* ================= estado ================= */
+function novoEstado(){return{v:2,sprites:[],atual:null,cor:'#304878',adicoes:[],semeado:false,
+  fluxo:{desc:'',cat:'quarto',itens:'',obs:'',vistas:'4',resposta:''}}}
+function carregar(){
+  try{const t=localStorage.getItem(KEY);if(t)return JSON.parse(t)}catch(e){}
+  const s=novoEstado();
+  try{const t1=localStorage.getItem(KEY1);if(t1){const o=JSON.parse(t1);
+    if(o&&o.angulos&&Object.keys(o.angulos).length){s.sprites.push({id:uid(),nome:o.nome||'sprite antigo',cat:'outro',tam:o.tam||32,angulos:o.angulos,espelhar:!!o.espelhar,diagonais:!!o.diagonais})}
+    if(o&&o.adicoes)s.adicoes=o.adicoes;}}catch(e){}
+  return s;
+}
+let S=carregar();
+let sel='frente', tool='lapis', grade=true, undo=[];
 let tSalvar=null;
 function salvar(){clearTimeout(tSalvar);tSalvar=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Não deu para salvar no aparelho. Faça um backup.')}},250)}
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
-function vazio(){return new Array(S.tam*S.tam).fill('')}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600)}
+function hexRGB(h){return[parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)]}
+function rgbHex(r,g,b){return'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('')}
+async function copiar(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();return ok}}
+function preencherCats(el,val){el.innerHTML=CATS.map(c=>`<option value="${c}">${c[0].toUpperCase()+c.slice(1)}</option>`).join('');if(val)el.value=val}
+
+/* ================= sprites: conversão ================= */
+function spriteDeJSON(j,cat){
+  const pal=j.paleta||{},angs=j.angulos||{};const ks=Object.keys(angs);if(!ks.length)throw new Error('sem ângulos');
+  const n=+j.tamanho||(angs[ks[0]]||[]).length||32;
+  const sp={id:uid(),nome:j.nome||'sprite',cat:cat||j.categoria||'outro',tam:n,angulos:{},espelhar:false,diagonais:false};
+  ks.forEach(k=>{const id=ALIAS[String(k).toLowerCase().trim()];if(!id)return;const linhas=angs[k];if(!Array.isArray(linhas))return;
+    const a=new Array(n*n).fill('');
+    for(let y=0;y<n;y++){const l=String(linhas[y]||'');for(let x=0;x<n;x++){const ch=l[x];if(ch&&ch!=='.'&&ch!==' '&&pal[ch])a[y*n+x]=String(pal[ch]).toLowerCase()}}
+    if(ANG.find(d=>d.id===id).diag)sp.diagonais=true;sp.angulos[id]=a});
+  if(!Object.keys(sp.angulos).length)throw new Error('nenhum ângulo reconhecido');
+  return sp;
+}
+function semear(forcar){
+  let n=0;
+  BASE.forEach(b=>{const ja=S.sprites.some(s=>s.base===b.slug);if(ja&&!forcar)return;if(ja)return;
+    try{const sp=spriteDeJSON(b.json,b.cat);sp.base=b.slug;S.sprites.push(sp);n++}catch(e){}});
+  S.semeado=true;if(!S.atual&&S.sprites[0])S.atual=S.sprites[0].id;salvar();return n;
+}
+if(!S.semeado)semear();
+if(!S.sprites.find(s=>s.id===S.atual))S.atual=S.sprites[0]?S.sprites[0].id:null;
+
+/* ================= abas ================= */
+function abrirAba(nome){
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===nome));
+  ['fluxo','biblioteca','editor','reuniao'].forEach(t=>$('#tab-'+t).classList.toggle('hide',t!==nome));
+  if(nome==='biblioteca')renderBiblio();
+  if(nome==='editor')renderEditorTudo();
+  if(nome==='reuniao')renderReuniao();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>abrirAba(b.dataset.tab));
+
+/* ================= desenho de miniaturas ================= */
+function cur(){return S.sprites.find(s=>s.id===S.atual)||null}
 function def(id){return ANG.find(a=>a.id===id)}
-function espelhado(id){const d=def(id);return S.espelhar&&!!d.esp}
-function espelhar(arr,n){const o=new Array(n*n);for(let y=0;y<n;y++)for(let x=0;x<n;x++)o[y*n+x]=arr[y*n+(n-1-x)];return o}
-function pix(id){
-  if(espelhado(id)){const b=S.angulos[def(id).esp];return b?espelhar(b,S.tam):null}
-  return S.angulos[id]||null;
-}
+function espelharArr(arr,n){const o=new Array(n*n);for(let y=0;y<n;y++)for(let x=0;x<n;x++)o[y*n+x]=arr[y*n+(n-1-x)];return o}
+function pixDe(sp,id){if(!sp)return null;const d=def(id);
+  if(sp.espelhar&&d.esp){const b=sp.angulos[d.esp];return b?espelharArr(b,sp.tam):null}
+  return sp.angulos[id]||null}
 function temConteudo(a){return a&&a.some(c=>c)}
-function visiveis(){return ANG.filter(a=>S.diagonais||!a.diag)}
+function desenharEm(c,a,n,esc,x0=0){const g=c.getContext('2d');if(!a)return;for(let i=0;i<a.length;i++)if(a[i]){g.fillStyle=a[i];g.fillRect(x0+(i%n)*esc,Math.floor(i/n)*esc,esc,esc)}}
+function mini(sp,id,esc=2.5){const c=document.createElement('canvas');c.className='px';c.width=c.height=sp.tam;desenharEm(c,pixDe(sp,id),sp.tam,1);const w=Math.min(sp.tam*esc,140)+'px';c.style.width=c.style.height=w;return c}
+function primeiraVista(sp){return['frente','direita','costas','esquerda','fd','fe','cd','ce'].find(k=>temConteudo(pixDe(sp,k)))||'frente'}
 
-/* ---------- abas ---------- */
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
-  $('#tab-sprites').classList.toggle('hide',b.dataset.tab!=='sprites');
-  $('#tab-reuniao').classList.toggle('hide',b.dataset.tab!=='reuniao');
-  if(b.dataset.tab==='reuniao')renderReuniao();
-});
-
-/* ---------- topo do sprite ---------- */
-$('#nome').value=S.nome; $('#tam').value=S.tam; $('#cor').value=S.cor;
-$('#nome').oninput=e=>{S.nome=e.target.value;salvar()};
-$('#tam').onchange=e=>{
-  const n=+e.target.value, o=S.tam;
-  for(const k in S.angulos){const a=S.angulos[k],b=new Array(n*n);
-    for(let y=0;y<n;y++)for(let x=0;x<n;x++)b[y*n+x]=a[Math.floor(y*o/n)*o+Math.floor(x*o/n)];
-    S.angulos[k]=b}
-  S.tam=n;undo=[];salvar();renderTudo();
-};
-function rotulos(){
-  $('#bDiag').textContent='Diagonais: '+(S.diagonais?'sim':'não');$('#bDiag').classList.toggle('on',S.diagonais);
-  $('#bEsp').textContent='Espelhar esquerda: '+(S.espelhar?'sim':'não');$('#bEsp').classList.toggle('on',S.espelhar);
+/* ================= PASSO 1: pedido para o Claude ================= */
+const F=S.fluxo;
+preencherCats($('#fCat'),F.cat);$('#fDesc').value=F.desc||'';$('#fItens').value=F.itens||'';$('#fObs').value=F.obs||'';$('#fVistas').value=F.vistas||'4';$('#fResp').value=F.resposta||'';
+['fCat','fDesc','fItens','fObs','fVistas'].forEach(id=>$('#'+id).addEventListener('input',()=>{F.cat=$('#fCat').value;F.desc=$('#fDesc').value;F.itens=$('#fItens').value;F.obs=$('#fObs').value;F.vistas=$('#fVistas').value;salvar()}));
+let coresRef=[];
+$('#refFoto').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const im=new Image();
+  im.onload=()=>{$('#refPrev').src=u;$('#refPrev').classList.remove('hide');coresRef=coresDominantes(im,8);
+    $('#refCores').innerHTML='';coresRef.forEach(c=>{const s=document.createElement('span');s.className='sw';s.style.background=c;s.title=c;$('#refCores').appendChild(s)})};
+  im.onerror=()=>toast('Não consegui abrir essa imagem. Tente JPG ou PNG.');im.src=u};
+function coresDominantes(im,k){
+  const c=document.createElement('canvas'),s=64;c.width=c.height=s;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0,s,s);
+  const d=g.getImageData(0,0,s,s).data,X=[];for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const r=d[i],gg=d[i+1],b=d[i+2];if(Math.min(r,b)-gg>120)continue;X.push([r,gg,b])}
+  if(!X.length)return[];const{C,cont}=kmeans(X,Math.min(k,X.length));
+  return C.map((c,i)=>({c,n:cont[i]})).filter(o=>o.n>X.length*0.02).sort((a,b)=>b.n-a.n).map(o=>rgbHex(...o.c));
 }
-$('#bDiag').onclick=()=>{S.diagonais=!S.diagonais;if(!S.diagonais&&def(sel).diag)sel='frente';salvar();renderTudo()};
-$('#bEsp').onclick=()=>{
-  if(S.espelhar){ANG.filter(a=>a.esp).forEach(a=>{const b=S.angulos[a.esp];if(b)S.angulos[a.id]=espelhar(b,S.tam)})}
-  S.espelhar=!S.espelhar;salvar();renderTudo();
-};
-$('#bNovo').onclick=()=>{if(!confirm('Começar um sprite novo? O atual será apagado (a nota da reunião fica).'))return;
-  const ad=S.adicoes;S=novoEstado();S.adicoes=ad;sel='frente';undo=[];$('#nome').value=S.nome;$('#tam').value=S.tam;salvar();renderTudo()};
+function resumoBiblioteca(){
+  const porCat={};S.sprites.forEach(s=>{(porCat[s.cat]=porCat[s.cat]||[]).push(s.nome)});
+  return Object.keys(porCat).length?Object.entries(porCat).map(([c,l])=>`- ${c}: ${l.join(', ')}`).join('\n'):'- (vazia)';
+}
+function paletaBiblioteca(){
+  const cont={};S.sprites.forEach(s=>Object.values(s.angulos).forEach(a=>a.forEach(c=>{if(c)cont[c]=(cont[c]||0)+1})));
+  const X=Object.entries(cont);if(!X.length)return'(ainda sem cores)';
+  const pts=[];X.forEach(([h,n])=>{const v=hexRGB(h);for(let i=0;i<Math.min(n,40);i++)pts.push(v)});
+  const{C}=kmeans(pts,Math.min(10,pts.length));return C.map(c=>rgbHex(...c)).join(', ');
+}
+const VISTAS_TXT={'4':'4 vistas: frente, lado direito, lado esquerdo, costas','1':'só a vista de frente','8':'8 vistas: frente, lado direito, lado esquerdo, costas e as 4 diagonais','anda':'personagem andando: 4 direções (frente, direita, esquerda, costas) × 3 quadros (parado, passo esquerdo, passo direito)'};
+function textoPedido(){
+  const itens=$('#fItens').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  return `PEDIDO DE PROMPT · OFICINA DE JOGOS
+Claude, anexei uma imagem de referência. Monte o prompt para o GPT gerar uma folha de sprites seguindo o padrão do projeto. Mantenha a constância com o que já existe na biblioteca.
 
-/* ---------- editor ---------- */
-const ed=$('#ed'), ctx=ed.getContext('2d');
-let zoom=10;
-function medir(){const w=Math.min(ed.parentElement.clientWidth-16,560);zoom=Math.max(4,Math.floor(w/S.tam));ed.width=ed.height=zoom*S.tam}
-function desenharXadrez(c,n,z,w){for(let y=0;y<n;y++)for(let x=0;x<n;x++){c.fillStyle=((x+y)&1)?cssVar('--check1'):cssVar('--check2');c.fillRect(x*z,y*z,z,z)}}
+O que eu quero: ${$('#fDesc').value.trim()||'(veja a imagem)'}
+Categoria: ${$('#fCat').value}
+Itens: ${itens.length?'\n'+itens.map((t,i)=>`${i+1}. ${t}`).join('\n'):'(você decide pela imagem)'}
+Vistas: ${VISTAS_TXT[$('#fVistas').value]}
+Observações: ${$('#fObs').value.trim()||'nenhuma'}
+${coresRef.length?'Cores principais da referência: '+coresRef.join(', '):''}
+
+PADRÃO DO PROJETO
+${ESTILO_FIXO}
+Régua: ${REGUA}
+Cores já usadas na biblioteca (manter materiais coerentes): ${paletaBiblioteca()}
+Biblioteca atual:
+${resumoBiblioteca()}
+
+COMO RESPONDER (o app lê estes blocos)
+1. Um bloco começando com a linha "PROMPT PARA O GPT", com o ESTILO FIXO no início e a lista de itens, um por linha, com tamanho em blocos e materiais.
+2. Um bloco começando com a linha "FICHA PARA O APP", com um JSON assim: {"categoria":"...","itens":["Nome 1","Nome 2"],"vistas":["frente","direita","esquerda","costas"],"largura_primeiro_px":32}
+   (largura_primeiro_px = largura real em pixels do 1º item, pela régua.)
+3. Um bloco "Adição para a Reunião".`;
+}
+$('#bPedido').onclick=async()=>{const ok=await copiar(textoPedido());const st=$('#stPedido');st.textContent=ok?'Pedido copiado. Cole no Claude e anexe a mesma imagem.':'Não consegui copiar.';st.className='status '+(ok?'ok':'erro')};
+
+/* ================= PASSO 2: resposta do Claude ================= */
+let ficha=null;
+function acharFicha(t){
+  for(let i=t.indexOf('{');i>=0;i=t.indexOf('{',i+1)){
+    let d=0;for(let j=i;j<t.length;j++){const ch=t[j];if(ch==='{')d++;else if(ch==='}'){d--;if(d===0){try{const o=JSON.parse(t.slice(i,j+1));if(o&&Array.isArray(o.itens))return o}catch(e){}break}}}
+  }return null}
+function extrairBloco(t,titulo,ate){
+  const L=t.split('\n');const i=L.findIndex(l=>l.toUpperCase().includes(titulo));if(i<0)return null;
+  let fim=L.length;for(let j=i+1;j<L.length;j++){if(ate.some(a=>L[j].toUpperCase().includes(a))){fim=j;break}}
+  return L.slice(i+1,fim).join('\n').replace(/```[a-z]*/gi,'').trim();
+}
+function lerResposta(){
+  const t=$('#fResp').value;F.resposta=t;salvar();const st=$('#stResp');
+  if(!t.trim()){st.textContent='Aguardando a resposta.';st.className='status';ficha=null;return}
+  ficha=acharFicha(t);
+  const p=extrairBloco(t,'PROMPT PARA O GPT',['FICHA PARA O APP','ADIÇÃO PARA A REUNIÃO','ADICAO PARA A REUNIAO']);
+  if(ficha){st.textContent=`Ficha lida: ${ficha.categoria||'sem categoria'}, ${ficha.itens.length} itens${ficha.largura_primeiro_px?', 1º item com '+ficha.largura_primeiro_px+' px':''}.${p?'':' Não achei o título “PROMPT PARA O GPT”; vou copiar a resposta inteira.'}`;st.className='status ok';
+    if(ficha.largura_primeiro_px)$('#refPx').value=ficha.largura_primeiro_px}
+  else{st.textContent='Não achei a ficha. O passo 3 ainda funciona, mas os nomes saem genéricos.';st.className='status erro'}
+}
+$('#fResp').addEventListener('input',lerResposta);
+$('#bPromptGPT').onclick=async()=>{const t=$('#fResp').value;if(!t.trim())return toast('Cole a resposta do Claude primeiro');
+  const p=extrairBloco(t,'PROMPT PARA O GPT',['FICHA PARA O APP','ADIÇÃO PARA A REUNIÃO','ADICAO PARA A REUNIAO'])||t;
+  toast(await copiar(p)?'Prompt copiado. Cole no GPT.':'Não consegui copiar.')};
+$('#bAddReuniao').onclick=()=>{const t=$('#fResp').value;const L=t.split('\n');const i=L.findIndex(l=>/adi[çc][ãa]o para a reuni[ãa]o/i.test(l));
+  if(i<0)return toast('Não achei o bloco “Adição para a Reunião”');
+  let fim=L.length;for(let j=i+1;j<L.length;j++){if(/^```\s*$/.test(L[j])){fim=j;break}}
+  adicionar(L.slice(i,fim).join('\n').replace(/```[a-z]*/gi,'').trim())};
+
+/* ================= PASSO 3: separar a folha ================= */
+let imgFolha=null, separados=[];
+$('#folha').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const im=new Image();
+  im.onload=()=>{imgFolha=im;$('#bSeparar').disabled=false;$('#stFolha').textContent=`Folha carregada (${im.width}×${im.height}). Toque em “Separar sprites”.`;$('#stFolha').className='status'};
+  im.onerror=()=>toast('Não consegui abrir essa imagem.');im.src=u};
+$('#bSeparar').onclick=()=>{if(!imgFolha)return;const st=$('#stFolha');st.textContent='Separando...';st.className='status';
+  setTimeout(()=>{try{separados=separarFolha(imgFolha,+$('#refPx').value||32);renderSeparados()}catch(err){st.textContent='Não consegui separar: '+err.message;st.className='status erro'}},30)};
+function mag(r,g,b){return(Math.min(r,b)-g)/255}
+function separarFolha(im,refPx){
+  const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);
+  const D=g.getImageData(0,0,W,H).data;
+  const obj=new Uint8Array(W*H);for(let i=0,p=0;i<W*H;i++,p+=4){if(D[p+3]>=128&&mag(D[p],D[p+1],D[p+2])<0.45)obj[i]=1}
+  const CS=4,cw=Math.ceil(W/CS),ch=Math.ceil(H/CS),cel=new Uint8Array(cw*ch);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(obj[y*W+x])cel[((y/CS)|0)*cw+((x/CS)|0)]++;
+  const on=new Uint8Array(cw*ch);for(let i=0;i<cw*ch;i++)if(cel[i]>=3)on[i]=1;
+  const dil=new Uint8Array(cw*ch);
+  for(let y=0;y<ch;y++)for(let x=0;x<cw;x++){if(!on[y*cw+x])continue;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<cw&&yy<ch)dil[yy*cw+xx]=1}}
+  const lab=new Int32Array(cw*ch).fill(-1),comps=[];
+  for(let i=0;i<cw*ch;i++){if(!dil[i]||lab[i]>=0)continue;const id=comps.length,st=[i];lab[i]=id;let x0=1e9,y0=1e9,x1=-1,y1=-1,cnt=0;
+    while(st.length){const k=st.pop(),x=k%cw,y=(k/cw)|0;if(on[k]){cnt++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+      for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=cw||yy>=ch)continue;const q=yy*cw+xx;if(dil[q]&&lab[q]<0){lab[q]=id;st.push(q)}}}
+    comps.push({id,cnt,x0,y0,x1,y1})}
+  let cs=comps.filter(o=>o.cnt>0).map(o=>{
+    // caixa exata em pixels
+    let X0=1e9,Y0=1e9,X1=-1,Y1=-1;
+    for(let y=o.y0*CS;y<Math.min(H,(o.y1+1)*CS);y++)for(let x=o.x0*CS;x<Math.min(W,(o.x1+1)*CS);x++){if(obj[y*W+x]&&lab[((y/CS)|0)*cw+((x/CS)|0)]===o.id){if(x<X0)X0=x;if(x>X1)X1=x;if(y<Y0)Y0=y;if(y>Y1)Y1=y}}
+    return{x0:X0,y0:Y0,x1:X1,y1:Y1,w:X1-X0+1,h:Y1-Y0+1,cnt:o.cnt}});
+  const maxA=Math.max(...cs.map(o=>o.w*o.h));cs=cs.filter(o=>o.w*o.h>maxA*0.04&&o.w>6&&o.h>6);
+  if(!cs.length)throw new Error('nenhum objeto encontrado. O fundo é magenta?');
+  // linhas
+  cs.sort((a,b)=>(a.y0+a.y1)-(b.y0+b.y1));
+  const hs=cs.map(o=>o.h).sort((a,b)=>a-b),hMed=hs[hs.length>>1];
+  const linhas=[];cs.forEach(o=>{const cy=(o.y0+o.y1)/2;const L=linhas.find(l=>Math.abs(l.cy-cy)<hMed*0.6);if(L){L.itens.push(o);L.cy=(L.cy*(L.itens.length-1)+cy)/L.itens.length}else linhas.push({cy,itens:[o]})});
+  linhas.sort((a,b)=>a.cy-b.cy);linhas.forEach(l=>l.itens.sort((a,b)=>a.x0-b.x0));
+  const P=linhas[0].itens[0].w/refPx;
+  if(P<1)throw new Error('a largura do 1º objeto está maior que a imagem. Diminua o número.');
+  const amostra=o=>{const w=Math.max(1,Math.round(o.w/P)),h=Math.max(1,Math.round(o.h/P)),px=[];
+    for(let j=0;j<h;j++)for(let i=0;i<w;i++){let r=0,gg=0,b=0,n=0,t=0;
+      const ya=Math.floor(o.y0+(j+.25)*P),yb=Math.ceil(o.y0+(j+.75)*P),xa=Math.floor(o.x0+(i+.25)*P),xb=Math.ceil(o.x0+(i+.75)*P);
+      for(let y=ya;y<=Math.min(H-1,yb);y++)for(let x=xa;x<=Math.min(W-1,xb);x++){t++;if(obj[y*W+x]){const p=(y*W+x)*4;r+=D[p];gg+=D[p+1];b+=D[p+2];n++}}
+      px.push(n>t*0.5?[r/n,gg/n,b/n]:null)}
+    return{w,h,px}};
+  const vistasPadrao=(ficha&&Array.isArray(ficha.vistas)&&ficha.vistas.length)?ficha.vistas:['frente','direita','esquerda','costas'];
+  return linhas.map((L,ri)=>{
+    const vs=L.itens.map(amostra);
+    // reduzir cores do item inteiro
+    const X=[];vs.forEach(v=>v.px.forEach(p=>p&&X.push(p)));
+    const k=Math.min(24,Math.max(2,X.length));const{C,lab}=kmeans(X,k);
+    const pal=C.map(c=>rgbHex(...c.map(v=>Math.min(248,Math.round(v/8)*8))));
+    let ii=0;vs.forEach(v=>{v.cor=v.px.map(p=>p?pal[lab[ii++]]:'')});
+    const maior=Math.max(...vs.map(v=>Math.max(v.w,v.h)));const tam=[32,48,64].find(t=>t>=maior)||64;
+    const nomes=ficha&&ficha.itens;const vistas=vs.length===1?['frente']:vistasPadrao.slice(0,vs.length).map(v=>ALIAS[String(v).toLowerCase()]||v);
+    const angulos={};
+    vs.forEach((v,vi)=>{const id=vistas[vi];if(!id||!def(id))return;const a=new Array(tam*tam).fill('');const ox=Math.floor((tam-v.w)/2),oy=tam-v.h;
+      for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){const X_=ox+x,Y_=oy+y;if(X_>=0&&Y_>=0&&X_<tam&&Y_<tam)a[Y_*tam+X_]=v.cor[y*v.w+x]}
+      angulos[id]=a});
+    return{incluir:true,nome:(nomes&&nomes[ri])||('Item '+(ri+1)),cat:(ficha&&ficha.categoria&&CATS.includes(ficha.categoria))?ficha.categoria:$('#fCat').value,
+      tam,angulos,diagonais:Object.keys(angulos).some(k=>def(k).diag),grande:maior>64,n:vs.length};
+  });
+}
+function renderSeparados(){
+  const box=$('#itensFolha');box.innerHTML='';const st=$('#stFolha');
+  const nf=ficha&&ficha.itens?ficha.itens.length:null;
+  st.textContent=`Encontrei ${separados.length} linhas de objetos.`+(nf&&nf!==separados.length?` A ficha tinha ${nf} itens: confira os nomes.`:'')+(separados.some(s=>s.grande)?' Algum objeto passou de 64 px e foi cortado: diminua a largura do 1º objeto.':'');
+  st.className='status '+((nf&&nf!==separados.length)||separados.some(s=>s.grande)?'erro':'ok');
+  separados.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<div class="row"><label class="row" style="gap:6px"><input type="checkbox" checked> Salvar</label>
+      <label class="f grow">Nome<input type="text" value=""></label><label class="f">Categoria<select></select></label><small style="color:var(--muted)">${it.tam}×${it.tam}</small></div><div class="vistas"></div>`;
+    const [cb]=d.querySelectorAll('input[type=checkbox]');const nm=d.querySelector('input[type=text]');const sc=d.querySelector('select');
+    nm.value=it.nome;preencherCats(sc,it.cat);
+    cb.onchange=()=>it.incluir=cb.checked;nm.oninput=()=>it.nome=nm.value;sc.onchange=()=>it.cat=sc.value;
+    const vb=d.querySelector('.vistas');
+    Object.keys(it.angulos).forEach(k=>{const f=document.createElement('figure');const c=document.createElement('canvas');c.className='px';c.width=c.height=it.tam;desenharEm(c,it.angulos[k],it.tam,1);f.appendChild(c);f.append(def(k).nome);vb.appendChild(f)});
+    box.appendChild(d)});
+  $('#rowSalvar').classList.toggle('hide',!separados.length);
+}
+$('#bSalvarFolha').onclick=()=>{const l=separados.filter(s=>s.incluir);if(!l.length)return toast('Marque pelo menos um item');
+  l.forEach(it=>S.sprites.push({id:uid(),nome:it.nome.trim()||'sprite',cat:it.cat,tam:it.tam,angulos:it.angulos,espelhar:false,diagonais:it.diagonais}));
+  S.atual=S.sprites[S.sprites.length-l.length].id;salvar();separados=[];$('#itensFolha').innerHTML='';$('#rowSalvar').classList.add('hide');
+  $('#stFolha').textContent=`${l.length} sprites salvos na biblioteca.`;$('#stFolha').className='status ok';toast(`${l.length} sprites salvos`);abrirAba('biblioteca')};
+
+/* ================= k-means ================= */
+function kmeans(X,k,it=12){
+  const ord=X.slice().sort((a,b)=>(a[0]*3+a[1]*6+a[2])-(b[0]*3+b[1]*6+b[2]));
+  let C=[];for(let i=0;i<k;i++)C.push(ord[Math.floor((i+.5)*ord.length/k)].slice());
+  const lab=new Int32Array(X.length);let cont=[];
+  for(let t=0;t<it;t++){const s=C.map(()=>[0,0,0,0]);
+    for(let j=0;j<X.length;j++){const q=X[j];let b=0,bd=1e12;for(let i=0;i<k;i++){const c=C[i],d=(q[0]-c[0])**2+(q[1]-c[1])**2+(q[2]-c[2])**2;if(d<bd){bd=d;b=i}}lab[j]=b;const a=s[b];a[0]+=q[0];a[1]+=q[1];a[2]+=q[2];a[3]++}
+    C=C.map((c,i)=>s[i][3]?[s[i][0]/s[i][3],s[i][1]/s[i][3],s[i][2]/s[i][3]]:c);cont=s.map(a=>a[3])}
+  return{C,lab,cont};
+}
+
+/* ================= BIBLIOTECA ================= */
+preencherCats($('#selCatBaixar'));
+function renderBiblio(){
+  const box=$('#biblio');box.innerHTML='';
+  if(!S.sprites.length){box.innerHTML='<p class="hint">A biblioteca está vazia. Crie sprites na aba Criar ou restaure a sala base.</p>';return}
+  CATS.forEach(c=>{const l=S.sprites.filter(s=>s.cat===c);if(!l.length)return;
+    const h=document.createElement('div');h.className='cat';h.textContent=`${c[0].toUpperCase()+c.slice(1)} (${l.length})`;box.appendChild(h);
+    const g=document.createElement('div');g.className='cards';
+    l.forEach(sp=>{const b=document.createElement('button');b.className='card'+(sp.id===S.atual?' sel':'');b.appendChild(mini(sp,primeiraVista(sp)));
+      b.append(sp.nome);const sm=document.createElement('small');sm.textContent=`${sp.tam}×${sp.tam} · ${Object.keys(sp.angulos).length} vistas`;b.appendChild(sm);
+      b.onclick=()=>{S.atual=sp.id;sel=primeiraVista(sp);undo=[];salvar();abrirAba('editor')};g.appendChild(b)});
+    box.appendChild(g)});
+  const usadas=CATS.filter(c=>S.sprites.some(s=>s.cat===c));if(usadas.length&&!usadas.includes($('#selCatBaixar').value))$('#selCatBaixar').value=usadas[0];
+}
+$('#bRestaurar').onclick=()=>{const n=semear(true);renderBiblio();toast(n?`${n} móveis da sala voltaram`:'A sala base já está completa')};
+$('#bBaixarCat').onclick=()=>{const c=$('#selCatBaixar').value;const l=S.sprites.filter(s=>s.cat===c);if(!l.length)return toast('Essa categoria está vazia');
+  const ord=['frente','direita','esquerda','costas','fd','fe','cd','ce'];const T=Math.max(...l.map(s=>s.tam)),e=4;
+  const cols=Math.max(...l.map(s=>ord.filter(k=>temConteudo(pixDe(s,k))).length));
+  const cv=document.createElement('canvas');cv.width=cols*T*e;cv.height=l.length*T*e;
+  l.forEach((s,r)=>{let c=0;ord.forEach(k=>{const p=pixDe(s,k);if(!temConteudo(p))return;const t=document.createElement('canvas');t.width=t.height=s.tam*e;desenharEm(t,p,s.tam,e);
+    cv.getContext('2d').drawImage(t,c*T*e+((T-s.tam)*e>>1),r*T*e+(T-s.tam)*e);c++})});
+  baixarCanvas(cv,'folha-'+slug(c)+'.png')};
+
+/* ================= EDITOR ================= */
+preencherCats($('#eCat'));
+function renderEditorTudo(){
+  const sp=cur();const vaz=!sp;
+  document.querySelectorAll('#tab-editor .win').forEach((w,i)=>{if(i<3)w.classList.toggle('hide',vaz)});
+  document.querySelector('#tab-editor .grid2').classList.toggle('hide',vaz);
+  if(vaz)return;
+  $('#nome').value=sp.nome;$('#tam').value=sp.tam;$('#eCat').value=sp.cat;$('#cor').value=S.cor;
+  if(!def(sel)||(def(sel).diag&&!sp.diagonais))sel='frente';
+  rotulos();renderEditor();renderAngs();renderSwatches();
+}
+$('#nome').oninput=e=>{const sp=cur();if(!sp)return;sp.nome=e.target.value;salvar()};
+$('#eCat').onchange=e=>{const sp=cur();if(!sp)return;sp.cat=e.target.value;salvar()};
+$('#tam').onchange=e=>{const sp=cur();if(!sp)return;const n=+e.target.value,o=sp.tam;
+  for(const k in sp.angulos){const a=sp.angulos[k],b=new Array(n*n).fill('');
+    // mantém o desenho apoiado embaixo e centralizado (corta ou ganha espaço)
+    const dx=Math.floor((n-o)/2),dy=n-o;
+    for(let y=0;y<o;y++)for(let x=0;x<o;x++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<n&&Y<n)b[Y*n+X]=a[y*o+x]}
+    sp.angulos[k]=b}
+  sp.tam=n;undo=[];salvar();renderEditorTudo()};
+function rotulos(){const sp=cur();
+  $('#bDiag').textContent='Diagonais: '+(sp.diagonais?'sim':'não');$('#bDiag').classList.toggle('on',sp.diagonais);
+  $('#bEsp').textContent='Espelhar esquerda: '+(sp.espelhar?'sim':'não');$('#bEsp').classList.toggle('on',sp.espelhar)}
+$('#bDiag').onclick=()=>{const sp=cur();sp.diagonais=!sp.diagonais;if(!sp.diagonais&&def(sel).diag)sel='frente';salvar();renderEditorTudo()};
+$('#bEsp').onclick=()=>{const sp=cur();
+  if(!sp.espelhar){const tem=ANG.filter(a=>a.esp&&temConteudo(sp.angulos[a.id]));if(tem.length&&!confirm('Ligar o espelho substitui a esquerda desenhada pela direita espelhada. Continuar?'))return}
+  else{ANG.filter(a=>a.esp).forEach(a=>{const b=sp.angulos[a.esp];if(b)sp.angulos[a.id]=espelharArr(b,sp.tam)})}
+  sp.espelhar=!sp.espelhar;salvar();renderEditorTudo()};
+$('#bDuplicar').onclick=()=>{const sp=cur();const c=JSON.parse(JSON.stringify(sp));c.id=uid();c.nome=sp.nome+' (cópia)';delete c.base;S.sprites.push(c);S.atual=c.id;salvar();renderEditorTudo();toast('Cópia criada')};
+$('#bExcluir').onclick=()=>{const sp=cur();if(!confirm(`Excluir “${sp.nome}” da biblioteca?`))return;S.sprites=S.sprites.filter(s=>s!==sp);S.atual=S.sprites[0]?S.sprites[0].id:null;salvar();abrirAba('biblioteca');toast('Excluído')};
+
+const ed=$('#ed'),ctx=ed.getContext('2d');let zoom=10;
 function cssVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function espelhado(id){const sp=cur();return sp&&sp.espelhar&&!!def(id).esp}
+function vazio(){const n=cur().tam;return new Array(n*n).fill('')}
+function medir(){const n=cur().tam;const w=Math.min(ed.parentElement.clientWidth-16,560);zoom=Math.max(4,Math.floor(w/n));ed.width=ed.height=zoom*n}
 function renderEditor(){
-  medir();const n=S.tam,z=zoom,a=pix(sel)||vazio();
-  desenharXadrez(ctx,n,z);
+  const sp=cur();if(!sp)return;medir();const n=sp.tam,z=zoom,a=pixDe(sp,sel)||vazio();
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ctx.fillStyle=((x+y)&1)?cssVar('--check1'):cssVar('--check2');ctx.fillRect(x*z,y*z,z,z)}
   for(let i=0;i<a.length;i++)if(a[i]){ctx.fillStyle=a[i];ctx.fillRect((i%n)*z,Math.floor(i/n)*z,z,z)}
   if(grade&&z>=6){ctx.strokeStyle='rgba(60,80,140,.18)';ctx.lineWidth=1;ctx.beginPath();
     for(let i=0;i<=n;i++){ctx.moveTo(i*z+.5,0);ctx.lineTo(i*z+.5,n*z);ctx.moveTo(0,i*z+.5);ctx.lineTo(n*z,i*z+.5)}ctx.stroke()}
-  $('#edTitulo').innerHTML=def(sel).nome+(espelhado(sel)?'<span class="badge">espelhado</span>':'');
+  $('#edTitulo').innerHTML='';$('#edTitulo').append(`${sp.nome} · ${def(sel).nome}`);
+  if(espelhado(sel)){const b=document.createElement('span');b.className='badge';b.textContent='espelhado';$('#edTitulo').appendChild(b)}
   $('#edEspelho').classList.toggle('hide',!espelhado(sel));
 }
-function celula(e){const r=ed.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*S.tam),y=Math.floor((e.clientY-r.top)/r.height*S.tam);
-  return(x<0||y<0||x>=S.tam||y>=S.tam)?null:y*S.tam+x}
-function alvo(){if(!S.angulos[sel])S.angulos[sel]=vazio();return S.angulos[sel]}
-function guardarUndo(){undo.push({id:sel,a:(S.angulos[sel]||vazio()).slice()});if(undo.length>40)undo.shift()}
+function celula(e){const n=cur().tam,r=ed.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*n),y=Math.floor((e.clientY-r.top)/r.height*n);return(x<0||y<0||x>=n||y>=n)?null:y*n+x}
+function alvo(){const sp=cur();if(!sp.angulos[sel])sp.angulos[sel]=vazio();return sp.angulos[sel]}
+function guardarUndo(){const sp=cur();undo.push({sid:sp.id,id:sel,a:(sp.angulos[sel]||vazio()).slice()});if(undo.length>40)undo.shift()}
 let pintando=false;
 ed.addEventListener('pointerdown',e=>{
-  if(espelhado(sel)){toast('Este ângulo é espelhado. Edite a direita.');return}
+  if(!cur())return;if(espelhado(sel)){toast('Este ângulo é espelhado. Edite a direita.');return}
   const i=celula(e);if(i==null)return;
-  if(tool==='conta'){const c=(pix(sel)||[])[i];if(c){S.cor=c;$('#cor').value=c;renderSwatches();toast('Cor escolhida')}return}
-  guardarUndo();
-  if(tool==='balde'){balde(i);depoisEditar();return}
-  pintando=true;ed.setPointerCapture(e.pointerId);pintar(i);
-});
+  if(tool==='conta'){const c=(pixDe(cur(),sel)||[])[i];if(c){S.cor=c;$('#cor').value=c;renderSwatches();toast('Cor escolhida')}return}
+  guardarUndo();if(tool==='balde'){balde(i);depoisEditar();return}
+  pintando=true;ed.setPointerCapture(e.pointerId);pintar(i)});
 ed.addEventListener('pointermove',e=>{if(!pintando)return;const i=celula(e);if(i!=null)pintar(i)});
 ed.addEventListener('pointerup',()=>{if(pintando){pintando=false;depoisEditar()}});
 ed.addEventListener('pointercancel',()=>{pintando=false});
-function pintar(i){const a=alvo();const v=tool==='borracha'?'':S.cor;if(a[i]===v)return;a[i]=v;
-  const n=S.tam,z=zoom,x=(i%n)*z,y=Math.floor(i/n)*z;
-  if(v){ctx.fillStyle=v;ctx.fillRect(x,y,z,z)}else{ctx.fillStyle=(((i%n)+Math.floor(i/n))&1)?cssVar('--check1'):cssVar('--check2');ctx.fillRect(x,y,z,z)}}
-function balde(i){const a=alvo(),n=S.tam,de=a[i],para=S.cor;if(de===para)return;const st=[i];
-  while(st.length){const k=st.pop();if(a[k]!==de)continue;a[k]=para;const x=k%n,y=(k/n)|0;
-    if(x>0)st.push(k-1);if(x<n-1)st.push(k+1);if(y>0)st.push(k-n);if(y<n-1)st.push(k+n)}}
+function pintar(i){const a=alvo(),n=cur().tam,v=tool==='borracha'?'':S.cor;if(a[i]===v)return;a[i]=v;
+  const z=zoom,x=(i%n)*z,y=Math.floor(i/n)*z;ctx.fillStyle=v||((((i%n)+Math.floor(i/n))&1)?cssVar('--check1'):cssVar('--check2'));ctx.fillRect(x,y,z,z)}
+function balde(i){const a=alvo(),n=cur().tam,de=a[i],para=S.cor;if(de===para)return;const st=[i];
+  while(st.length){const k=st.pop();if(a[k]!==de)continue;a[k]=para;const x=k%n,y=(k/n)|0;if(x>0)st.push(k-1);if(x<n-1)st.push(k+1);if(y>0)st.push(k-n);if(y<n-1)st.push(k+n)}}
 function depoisEditar(){salvar();renderEditor();renderAngs();renderSwatches()}
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('on',x===b))});
 $('#cor').oninput=e=>{S.cor=e.target.value;salvar();renderSwatches()};
-$('#bUndo').onclick=()=>{const u=undo.pop();if(!u){toast('Nada para desfazer');return}S.angulos[u.id]=u.a;sel=u.id;depoisEditar()};
+$('#bUndo').onclick=()=>{const u=undo.pop();if(!u)return toast('Nada para desfazer');const sp=S.sprites.find(s=>s.id===u.sid);if(!sp)return;sp.angulos[u.id]=u.a;S.atual=sp.id;sel=u.id;salvar();renderEditorTudo()};
 $('#bGrade').onclick=()=>{grade=!grade;$('#bGrade').classList.toggle('on',grade);renderEditor()};
-$('#bLimpar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');if(!confirm('Limpar o ângulo '+def(sel).nome+'?'))return;guardarUndo();delete S.angulos[sel];depoisEditar()};
-$('#bVirar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const a=S.angulos[sel];if(!temConteudo(a))return toast('Ângulo vazio');guardarUndo();S.angulos[sel]=espelhar(a,S.tam);depoisEditar()};
-$('#bCopiarDe').onclick=()=>{
-  if(espelhado(sel))return toast('Este ângulo é espelhado.');
-  const ops=visiveis().filter(a=>a.id!==sel&&temConteudo(pix(a.id)));
-  if(!ops.length)return toast('Nenhum outro ângulo tem desenho ainda');
-  const r=prompt('Copiar de qual ângulo?\n'+ops.map((a,i)=>(i+1)+' = '+a.nome).join('\n'),'1');
-  const o=ops[(+r||0)-1];if(!o)return;guardarUndo();S.angulos[sel]=pix(o.id).slice();depoisEditar();toast('Copiado de '+o.nome);
-};
-
-/* ---------- cores ---------- */
-function coresUsadas(){const s=new Set();for(const k in S.angulos)(S.angulos[k]||[]).forEach(c=>c&&s.add(c));return[...s]}
-function renderSwatches(){const box=$('#swatches');box.innerHTML='';
-  const cs=coresUsadas().slice(0,40);if(!cs.includes(S.cor))cs.unshift(S.cor);
+$('#bLimpar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');if(!confirm('Limpar o ângulo '+def(sel).nome+'?'))return;guardarUndo();delete cur().angulos[sel];depoisEditar()};
+$('#bVirar').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const sp=cur(),a=sp.angulos[sel];if(!temConteudo(a))return toast('Ângulo vazio');guardarUndo();sp.angulos[sel]=espelharArr(a,sp.tam);depoisEditar()};
+$('#bCopiarDe').onclick=()=>{if(espelhado(sel))return toast('Este ângulo é espelhado.');const sp=cur();
+  const ops=visiveis().filter(a=>a.id!==sel&&temConteudo(pixDe(sp,a.id)));if(!ops.length)return toast('Nenhum outro ângulo tem desenho ainda');
+  const r=prompt('Copiar de qual ângulo?\n'+ops.map((a,i)=>(i+1)+' = '+a.nome).join('\n'),'1');const o=ops[(+r||0)-1];if(!o)return;
+  guardarUndo();sp.angulos[sel]=pixDe(sp,o.id).slice();depoisEditar();toast('Copiado de '+o.nome)};
+function visiveis(){const sp=cur();return ANG.filter(a=>sp.diagonais||!a.diag)}
+function coresUsadas(){const s=new Set();const sp=cur();if(sp)for(const k in sp.angulos)(sp.angulos[k]||[]).forEach(c=>c&&s.add(c));return[...s]}
+function renderSwatches(){const box=$('#swatches');box.innerHTML='';const cs=coresUsadas().slice(0,48);if(!cs.includes(S.cor))cs.unshift(S.cor);
   cs.forEach(c=>{const b=document.createElement('button');b.className='sw'+(c===S.cor?' sel':'');b.style.background=c;b.title=c;b.setAttribute('aria-label','Cor '+c);
     b.onclick=()=>{S.cor=c;$('#cor').value=c;salvar();renderSwatches()};box.appendChild(b)})}
-
-/* ---------- miniaturas ---------- */
-function desenharEm(c,a,n,esc,x0=0){const g=c.getContext('2d');if(!a)return;for(let i=0;i<a.length;i++)if(a[i]){g.fillStyle=a[i];g.fillRect(x0+(i%n)*esc,Math.floor(i/n)*esc,esc,esc)}}
-function renderAngs(){const box=$('#angs');box.innerHTML='';
-  visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');
-    const c=document.createElement('canvas');c.width=c.height=S.tam;const p=pix(a.id);desenharEm(c,p,S.tam,1);
-    b.appendChild(c);b.append(a.nome);const s=document.createElement('small');s.textContent=espelhado(a.id)?'espelhado':(temConteudo(p)?'pronto':'vazio');b.appendChild(s);
+function renderAngs(){const box=$('#angs');box.innerHTML='';const sp=cur();
+  visiveis().forEach(a=>{const b=document.createElement('button');b.className='ang'+(a.id===sel?' sel':'');b.appendChild(mini(sp,a.id,2));b.append(a.nome);
+    const s=document.createElement('small');s.textContent=espelhado(a.id)?'espelhado':(temConteudo(pixDe(sp,a.id))?'pronto':'vazio');b.appendChild(s);
     b.onclick=()=>{sel=a.id;renderEditor();renderAngs()};box.appendChild(b)})}
-
-/* ---------- baixar ---------- */
 function baixarCanvas(c,nome){c.toBlob(b=>{const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download=nome;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)},'image/png')}
-function slug(){return(S.nome||'sprite').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'sprite'}
-$('#bFolha').onclick=()=>{const fs=visiveis().filter(a=>temConteudo(pix(a.id)));if(!fs.length)return toast('Desenhe ou importe um ângulo primeiro');
-  const e=+$('#escala').value,n=S.tam,c=document.createElement('canvas');c.width=n*e*fs.length;c.height=n*e;
-  fs.forEach((a,i)=>desenharEm(c,pix(a.id),n,e,i*n*e));baixarCanvas(c,slug()+'-folha.png');toast('Folha: '+fs.map(a=>a.nome).join(', '))};
-$('#bUm').onclick=()=>{const p=pix(sel);if(!temConteudo(p))return toast('Este ângulo está vazio');const e=+$('#escala').value,c=document.createElement('canvas');c.width=c.height=S.tam*e;desenharEm(c,p,S.tam,e);baixarCanvas(c,slug()+'-'+sel+'.png')};
-
-/* ---------- foto para pixel ---------- */
-$('#foto').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);const im=new Image();
-  im.onload=()=>{imgFoto=im;$('#prevOrig').src=u;$('#prevOrig').classList.remove('hide');$('#bPixel').disabled=false};
-  im.onerror=()=>toast('Não consegui abrir essa imagem. Tente JPG ou PNG.');im.src=u};
-$('#bPixel').onclick=()=>{if(!imgFoto)return;if(espelhado(sel))return toast('Escolha um ângulo que não seja espelhado');
-  if(temConteudo(S.angulos[sel])&&!confirm('Substituir o desenho de '+def(sel).nome+'?'))return;
-  guardarUndo();S.angulos[sel]=pixelizar(imgFoto,S.tam,+$('#kcores').value,$('#fundo').value==='1',$('#contorno').value,+$('#tol').value||40);
-  depoisEditar();toast('Pronto em '+def(sel).nome)};
-
-function pixelizar(img,N,K,tirarFundo,contorno,tol){
-  const M=N*4,c=document.createElement('canvas');c.width=c.height=M;const g=c.getContext('2d',{willReadFrequently:true});
-  const pad=contorno==='fora'?2*4:0, area=M-pad*2;
-  const s=area/Math.max(img.width,img.height),w=Math.round(img.width*s),h=Math.round(img.height*s),ox=Math.round((M-w)/2),oy=Math.round((M-h)/2);
-  g.imageSmoothingQuality='high';g.drawImage(img,ox,oy,w,h);
-  if(tirarFundo){const d=g.getImageData(0,0,M,M),p=d.data;
-    const cant=[[ox,oy],[ox+w-1,oy],[ox,oy+h-1],[ox+w-1,oy+h-1]].map(([x,y])=>{const i=(y*M+x)*4;return[p[i],p[i+1],p[i+2]]});
-    const ref=[0,1,2].map(k=>cant.reduce((s,v)=>s+v[k],0)/4);const t2=tol*tol;
-    const vis=new Uint8Array(M*M),st=[];
-    for(let x=ox;x<ox+w;x++){st.push(oy*M+x,(oy+h-1)*M+x)}for(let y=oy;y<oy+h;y++){st.push(y*M+ox,y*M+ox+w-1)}
-    while(st.length){const k=st.pop();if(vis[k])continue;vis[k]=1;const i=k*4;if(p[i+3]===0)continue;
-      const dr=p[i]-ref[0],dg=p[i+1]-ref[1],db=p[i+2]-ref[2];if(dr*dr+dg*dg+db*db>t2)continue;p[i+3]=0;
-      const x=k%M,y=(k/M)|0;if(x>0)st.push(k-1);if(x<M-1)st.push(k+1);if(y>0)st.push(k-M);if(y<M-1)st.push(k+M)}
-    g.putImageData(d,0,0)}
-  const c2=document.createElement('canvas');c2.width=c2.height=N;const g2=c2.getContext('2d',{willReadFrequently:true});
-  g2.imageSmoothingQuality='high';g2.drawImage(c,0,0,N,N);const p=g2.getImageData(0,0,N,N).data;
-  const px=[];for(let i=0;i<N*N;i++){if(p[i*4+3]>=128)px.push([p[i*4],p[i*4+1],p[i*4+2],i])}
-  const out=new Array(N*N).fill('');if(!px.length)return out;
-  // k-means
-  const ord=px.slice().sort((a,b)=>(a[0]*3+a[1]*6+a[2])-(b[0]*3+b[1]*6+b[2]));
-  let cen=[];for(let k=0;k<Math.min(K,ord.length);k++)cen.push(ord[Math.floor((k+.5)*ord.length/Math.min(K,ord.length))].slice(0,3));
-  const lab=new Int32Array(px.length);
-  for(let it=0;it<12;it++){const sum=cen.map(()=>[0,0,0,0]);
-    px.forEach((q,j)=>{let b=0,bd=1e9;cen.forEach((c,k)=>{const d=(q[0]-c[0])**2+(q[1]-c[1])**2+(q[2]-c[2])**2;if(d<bd){bd=d;b=k}});lab[j]=b;const s=sum[b];s[0]+=q[0];s[1]+=q[1];s[2]+=q[2];s[3]++});
-    cen=cen.map((c,k)=>sum[k][3]?[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]]:c)}
-  const gba=v=>Math.min(248,Math.round(v/8)*8);
-  const hex=c=>'#'+c.map(v=>gba(v).toString(16).padStart(2,'0')).join('');
-  px.forEach((q,j)=>out[q[3]]=hex(cen[lab[j]]));
-  const viz=i=>{const x=i%N,y=(i/N)|0,r=[];if(x>0)r.push(i-1);if(x<N-1)r.push(i+1);if(y>0)r.push(i-N);if(y<N-1)r.push(i+N);return r};
-  const escuro=h=>{const v=[1,3,5].map(k=>parseInt(h.substr(k,2),16));return hex([v[0]*.35+10,v[1]*.35+12,v[2]*.35+22])};
-  if(contorno==='borda'){const base=out.slice();for(let i=0;i<N*N;i++){if(!base[i])continue;const x=i%N,y=(i/N)|0;
-      if(x===0||y===0||x===N-1||y===N-1||viz(i).some(k=>!base[k]))out[i]=escuro(base[i])}}
-  else if(contorno==='fora'){const base=out.slice();for(let i=0;i<N*N;i++){if(base[i])continue;const v=viz(i).find(k=>base[k]);if(v!=null)out[i]=escuro(base[v])}}
-  return out;
-}
-
-/* ---------- Claude: pedido e importação ---------- */
-function listaAngulosPedido(){return visiveis().filter(a=>!espelhado(a.id)).map(a=>a.nome.toLowerCase())}
-function textoPedido(){const n=S.tam,ang=listaAngulosPedido();
-  return `Claude, anexei a foto de um objeto. Veja o que é e desenhe um sprite em pixel art no estilo Pokémon de GBA (FireRed/Emerald): contorno escuro, sombreado de 3 a 4 tons por cor, luz vindo de cima à esquerda, vista levemente de cima como nos jogos.
-Nome: ${S.nome||'sprite'}
-Tamanho: ${n}x${n} pixels.
-Ângulos: ${ang.join(', ')}.${S.espelhar?' Não desenhe a esquerda: o app espelha a direita sozinho.':''}
-Mantenha o objeto do mesmo tamanho e as mesmas cores em todos os ângulos.
-
-Responda com um bloco JSON neste formato, e nada além do bloco:
-{
-  "nome": "${S.nome||'sprite'}",
-  "tamanho": ${n},
-  "paleta": { "a": "#203048", "b": "#5878b0" },
-  "angulos": {
-    "${ang[0]||'frente'}": ["${'.'.repeat(Math.min(n,8))}... (${n} linhas, cada uma com ${n} caracteres)"]
-  }
-}
-Regras: "." é transparente; cada letra da paleta é uma cor; cada ângulo tem exatamente ${n} linhas de ${n} caracteres; no máximo 16 cores. Os nomes dos ângulos são: frente, costas, direita, esquerda, frente-direita, frente-esquerda, costas-direita, costas-esquerda.`}
-async function copiar(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();return ok}}
-$('#bPedido').onclick=async()=>toast(await copiar(textoPedido())?'Pedido copiado. Cole no Claude junto com a foto.':'Não consegui copiar.');
-$('#bImportar').onclick=()=>{
-  let t=$('#txtGrade').value.trim();if(!t)return toast('Cole a resposta do Claude primeiro');
-  t=t.replace(/```(json)?/gi,'');const i0=t.indexOf('{'),i1=t.lastIndexOf('}');if(i0<0||i1<0)return toast('Não achei o bloco JSON na resposta');
+function slug(t){return(t||'sprite').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'sprite'}
+$('#bFolha').onclick=()=>{const sp=cur();const fs=visiveis().filter(a=>temConteudo(pixDe(sp,a.id)));if(!fs.length)return toast('Desenhe ou importe um ângulo primeiro');
+  const e=+$('#escala').value,n=sp.tam,c=document.createElement('canvas');c.width=n*e*fs.length;c.height=n*e;fs.forEach((a,i)=>desenharEm(c,pixDe(sp,a.id),n,e,i*n*e));baixarCanvas(c,slug(sp.nome)+'-folha.png')};
+$('#bUm').onclick=()=>{const sp=cur(),p=pixDe(sp,sel);if(!temConteudo(p))return toast('Este ângulo está vazio');const e=+$('#escala').value,c=document.createElement('canvas');c.width=c.height=sp.tam*e;desenharEm(c,p,sp.tam,e);baixarCanvas(c,slug(sp.nome)+'-'+sel+'.png')};
+function importarTexto(t){
+  t=t.replace(/```(json)?/gi,'');const i0=t.indexOf('{'),i1=t.lastIndexOf('}');if(i0<0||i1<0)return toast('Não achei o bloco JSON');
   let j;try{j=JSON.parse(t.slice(i0,i1+1))}catch(e){return toast('O JSON veio com erro. Peça ao Claude para reenviar só o bloco.')}
-  const pal=j.paleta||{},angs=j.angulos||{};const ks=Object.keys(angs);if(!ks.length)return toast('A resposta não tem ângulos');
-  let n=+j.tamanho||(angs[ks[0]]||[]).length||S.tam;
-  if(n!==S.tam){if(!confirm('O sprite veio em '+n+'x'+n+'. Mudar o tamanho do projeto para '+n+'?'))return;S.angulos={};S.tam=n;$('#tam').value=[16,24,32,48,64].includes(n)?n:32}
-  if(j.nome){S.nome=j.nome;$('#nome').value=j.nome}
-  const feitos=[];
-  ks.forEach(k=>{const id=ALIAS[k.toLowerCase().trim()];if(!id)return;const linhas=angs[k];if(!Array.isArray(linhas))return;
-    const a=new Array(n*n).fill('');for(let y=0;y<n;y++){const l=String(linhas[y]||'');for(let x=0;x<n;x++){const ch=l[x];if(ch&&ch!=='.'&&ch!==' '&&pal[ch])a[y*n+x]=String(pal[ch]).toLowerCase()}}
-    if(def(id).esp&&S.espelhar){S.espelhar=false}
-    if(def(id).diag)S.diagonais=true;
-    S.angulos[id]=a;feitos.push(def(id).nome)});
-  if(!feitos.length)return toast('Nenhum nome de ângulo reconhecido');
-  undo=[];sel=ALIAS[ks[0].toLowerCase()]||'frente';salvar();renderTudo();toast('Ângulos colocados: '+feitos.join(', '));
-};
+  try{const sp=spriteDeJSON(j);S.sprites.push(sp);S.atual=sp.id;sel=primeiraVista(sp);undo=[];salvar();renderEditorTudo();toast(`“${sp.nome}” entrou na biblioteca`)}catch(e){toast('Não consegui ler: '+e.message)}
+}
+$('#bImportar').onclick=()=>{const t=$('#txtGrade').value.trim();if(!t)return toast('Cole o JSON primeiro');importarTexto(t);$('#txtGrade').value=''};
+$('#arqJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>importarTexto(String(r.result));r.readAsText(f);e.target.value=''};
 
-/* ---------- reunião ---------- */
+/* ================= REUNIÃO ================= */
 function notaBase(){
-  const prontos=ANG.filter(a=>temConteudo(pix(a.id))).map(a=>a.nome+(espelhado(a.id)?' (espelhado)':''));
   return `REUNIÃO · OFICINA DE JOGOS (Tama)
 
 Instrução para o Claude:
 Leia esta nota inteira antes de responder; ela é o histórico do projeto. Continue de onde paramos, sem pedir que eu explique de novo. No fim de cada resposta, entregue um bloco “Adição para a Reunião” curto, dizendo o que mudou ou foi decidido, para eu colar no app.
 
 Sobre o projeto:
-- App pessoal para criar jogos pequenos, em repositório próprio no GitHub Pages, separado da Tamaki Central.
-- Uso no tablet Samsung Galaxy A11. Tudo gratuito e leve, sem mandar meu material para IAs de fora.
-- Abas prontas: Sprites e Reunião. Próximas etapas: Passo a passo (trilha de como fazer um jogo) e Engine (motor 2D na web).
-- Arquivos do app: index.html, manifest.json, sw.js, icon-192.png, icon-512.png.
+- App pessoal para criar jogos pequenos, em repositório próprio no GitHub Pages, separado da Tamaki Central. Uso no tablet Samsung Galaxy A11. Tudo gratuito.
+- Abas: Criar (fluxo), Biblioteca, Editor e Reunião. Próximas etapas: Passo a passo (trilha de como fazer um jogo) e Engine (motor 2D na web).
 
-Como a aba Sprites funciona:
-- Foto vira pixel art no app (redução, cores estilo GBA de 15 bits, contorno), offline.
-- Os outros ângulos o Claude desenha em grade JSON: {"nome","tamanho","paleta":{"letra":"#hex"},"angulos":{"frente":[linhas]}}; "." é transparente.
-- Ângulos: frente, costas, direita, esquerda, e diagonais opcionais. A esquerda pode ser a direita espelhada.
-- Editor com lápis, borracha, balde, conta-gotas, desfazer; baixa folha de sprites em PNG.
+Fluxo de sprites (padrão):
+1. No app: imagem de referência + descrição → “Pedido para o Claude” (já leva o estilo, a régua e a biblioteca).
+2. O Claude responde com: “PROMPT PARA O GPT”, “FICHA PARA O APP” (JSON com categoria, itens, vistas, largura_primeiro_px) e “Adição para a Reunião”.
+3. O GPT gera a folha com fundo magenta.
+4. O app separa a folha, ajusta à grade e salva na biblioteca. O Claude confere constância de escala, ângulo e cores.
 
-Sprite atual: ${S.nome||'sem nome'}, ${S.tam}x${S.tam}, ${coresUsadas().length} cores.
-Ângulos prontos: ${prontos.length?prontos.join(', '):'nenhum ainda'}.`}
+${ESTILO_FIXO}
+
+Régua: ${REGUA}
+
+Biblioteca (${S.sprites.length} sprites):
+${resumoBiblioteca()}`}
 function notaCompleta(){let t=notaBase();if(S.adicoes.length){t+='\n\nAdições:';S.adicoes.forEach(a=>{t+='\n\n['+new Date(a.d).toLocaleDateString('pt-BR')+']\n'+a.t})}return t}
-function renderReuniao(){$('#nota').textContent=notaCompleta();const box=$('#listaAdd');box.innerHTML='';
-  if(!S.adicoes.length)return;const h=document.createElement('h3');h.textContent='Adições guardadas';box.appendChild(h);
+function renderReuniao(){$('#nota').textContent=notaCompleta();const box=$('#listaAdd');box.innerHTML='';if(!S.adicoes.length)return;
+  const h=document.createElement('h3');h.textContent='Adições guardadas';box.appendChild(h);
   S.adicoes.slice().reverse().forEach(a=>{const d=document.createElement('div');d.className='add';
-    d.innerHTML='<div class="meta"><span></span><button class="btn warn">Remover</button></div><pre></pre>';
+    d.innerHTML='<div class="meta"><span></span><button class="btn warn small">Remover</button></div><pre></pre>';
     d.querySelector('span').textContent=new Date(a.d).toLocaleString('pt-BR');d.querySelector('pre').textContent=a.t;
-    d.querySelector('button').onclick=()=>{if(!confirm('Remover esta adição da nota?'))return;S.adicoes=S.adicoes.filter(x=>x!==a);salvar();renderReuniao()};
-    box.appendChild(d)})}
-function adicionar(t){t=(t||'').trim();if(!t)return toast('Escreva ou cole algo primeiro');S.adicoes.push({d:Date.now(),t});salvar();renderReuniao();toast('Adicionado à nota')}
+    d.querySelector('button').onclick=()=>{if(!confirm('Remover esta adição da nota?'))return;S.adicoes=S.adicoes.filter(x=>x!==a);salvar();renderReuniao()};box.appendChild(d)})}
+function adicionar(t){t=(t||'').trim();if(!t)return toast('Escreva ou cole algo primeiro');S.adicoes.push({d:Date.now(),t});salvar();renderReuniao();toast('Adicionado à nota da Reunião')}
 $('#bCopiarNota').onclick=async()=>toast(await copiar(notaCompleta())?'Nota copiada':'Não consegui copiar.');
 $('#bAdd').onclick=()=>{adicionar($('#txtAdd').value);$('#txtAdd').value=''};
 $('#arqAdd').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{let t=String(r.result);if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(t,'text/html');t=d.body?d.body.innerText||d.body.textContent:t}
-    adicionar('Arquivo: '+f.name+'\n'+t.trim())};r.readAsText(f);e.target.value=''};
-$('#bExport').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download='oficina-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast('Backup salvo')};
+  r.onload=()=>{let t=String(r.result);if(/\.html?$/i.test(f.name)){const d=new DOMParser().parseFromString(t,'text/html');t=d.body?d.body.innerText||d.body.textContent:t}adicionar('Arquivo: '+f.name+'\n'+t.trim())};r.readAsText(f);e.target.value=''};
+$('#bExport').onclick=()=>{const b=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download='oficina-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast('Backup salvo')};
 $('#arqBackup').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||!j.tam||!j.angulos)throw 0;if(!confirm('Abrir este backup? O que está no app agora será trocado.'))return;
-    S=Object.assign(novoEstado(),j);sel='frente';undo=[];$('#nome').value=S.nome;$('#tam').value=S.tam;$('#cor').value=S.cor;salvar();renderTudo();renderReuniao();toast('Backup aberto')}
+  r.onload=()=>{try{let j=JSON.parse(r.result);
+      if(j&&j.tam&&j.angulos&&!j.sprites){const s=novoEstado();s.sprites=[{id:uid(),nome:j.nome||'sprite',cat:'outro',tam:j.tam,angulos:j.angulos,espelhar:!!j.espelhar,diagonais:!!j.diagonais}];s.adicoes=j.adicoes||[];s.semeado=false;j=s}
+      if(!j||!Array.isArray(j.sprites))throw 0;if(!confirm('Abrir este backup? O que está no app agora será trocado.'))return;
+      S=Object.assign(novoEstado(),j);if(!S.semeado)semear();S.atual=S.sprites[0]?S.sprites[0].id:null;salvar();location.reload()}
     catch(_){toast('Esse arquivo não é um backup da Oficina')}};r.readAsText(f);e.target.value=''};
 
-function renderTudo(){rotulos();renderEditor();renderAngs();renderSwatches()}
-window.addEventListener('resize',()=>renderEditor());
-matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>renderEditor());
-renderTudo();
+window.addEventListener('resize',()=>{if(!$('#tab-editor').classList.contains('hide'))renderEditor()});
+lerResposta();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+window.__oficina={S:()=>S,separarFolha,abrirAba};
 })();
 </script>
 </body>
